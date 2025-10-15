@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Logo } from "./logo";
+import Link from "next/link";
 
 const Navbar = () => {
   return (
@@ -14,7 +15,9 @@ const Navbar = () => {
           <Button variant="secondary" className="hidden sm:inline-flex">
             Sign In
           </Button>
-          <Button>Get Started</Button>
+          <Link href="/signup">
+            <Button>Get Started</Button>
+          </Link>
 
           {/* Mobile Menu */}
           {/* <div className="md:hidden">
