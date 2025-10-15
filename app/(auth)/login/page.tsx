@@ -47,11 +47,7 @@ export default function LoginPage() {
       } catch {
         alert("Login failed. Please try again.");
       }
-    } else {
-      const session = await fetch("/api/auth/session").then((r) => r.json());
-      localStorage.setItem("accessToken", session.accessToken);
-      localStorage.setItem("refreshToken", session.refreshToken);
-    }
+    } else alert("Logged in successfully!");
   };
 
   return (
