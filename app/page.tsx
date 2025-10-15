@@ -1,3 +1,4 @@
+import CTAAndFooter from "./components/CTAandFooter";
 import Hero from "./components/Hero";
 import KeyFeatures from "./components/KeyFeatures";
 
@@ -6,6 +7,7 @@ export default function Home() {
     <main className="w-full min-h-screen">
       <Hero />
       <KeyFeatures />
+      <CTAAndFooter />
     </main>
   );
 }
