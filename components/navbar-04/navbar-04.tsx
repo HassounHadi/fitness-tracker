@@ -22,9 +22,9 @@ const Navbar = () => {
             <Button className="rounded-full">Get Started</Button>
 
             {/* Mobile Menu */}
-            <div className="md:hidden">
+            {/* <div className="md:hidden">
               <NavigationSheet />
-            </div>
+            </div> */}
           </div>
         </div>
       </nav>
