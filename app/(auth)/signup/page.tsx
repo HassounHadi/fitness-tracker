@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { GoogleIcon } from "@/public/icons/GoogleIcon";
 
 const signupSchema = z
   .object({
@@ -33,8 +35,22 @@ export default function SignupPage() {
   });
 
   const onSubmit = async (data: SignupForm) => {
-    // TODO: connect with Supabase or Prisma
-    console.log("Form submitted:", data);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Signup failed");
+      }
+
+      alert("Account created! You can now log in.");
+    } catch (error: any) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -96,6 +112,14 @@ export default function SignupPage() {
             {/* Submit */}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Signing up..." : "Sign Up"}
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full mt-2 text-foreground border border-border hover:scale-100 hover:bg-accent/5 hover:text-accent hover:border-accent"
+              onClick={() => signIn("google")}
+            >
+              <GoogleIcon className="w-5 h-5 mr-3" />
+              Sign up with Google
             </Button>
 
             <p className="text-center text-sm text-muted-foreground pt-2">
