@@ -12,9 +12,11 @@ const Navbar = () => {
         {/* <NavMenu className="hidden md:block" /> */}
 
         <div className="flex items-center gap-3">
-          <Button variant="secondary" className="hidden sm:inline-flex">
-            Sign In
-          </Button>
+          <Link href="/login">
+            <Button variant="secondary" className="hidden sm:inline-flex">
+              Sign In
+            </Button>
+          </Link>
           <Link href="/signup">
             <Button>Get Started</Button>
           </Link>
