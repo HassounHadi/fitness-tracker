@@ -13,41 +13,42 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     CredentialsProvider({
-      name: "credentials",
+      name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials");
+        const { email, password } = credentials ?? {};
+
+        if (!email || !password) {
+          throw new Error("Please provide both email and password.");
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-
-        if (!user || !user.password) {
-          throw new Error("Invalid credentials");
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+          throw new Error("No account found with this email.");
         }
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
+        const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-          throw new Error("Invalid credentials");
+          throw new Error("Incorrect password.");
         }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        };
+        return user; // success
       },
     }),
   ],
+  callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      // You can log or perform extra checks here
+      return true;
+    },
+    async session({ session, token, user }) {
+      if (session.user) session.user.id = user?.id ?? token?.sub ?? "";
+      return session;
+    },
+  },
   session: {
     strategy: "jwt",
   },

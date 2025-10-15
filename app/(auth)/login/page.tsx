@@ -39,11 +39,15 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      alert("Invalid email or password");
-    } else {
-      alert("Logged in successfully!");
-      console.log("User logged in", res);
-    }
+      try {
+        const errorResponse = await fetch(`/api/auth/error?error=${res.error}`);
+        const errorData = await errorResponse.json();
+        alert(errorData.message || "Something went wrong.");
+        console.log(errorData.message);
+      } catch {
+        alert("Login failed. Please try again.");
+      }
+    } else alert("Logged in successfully!");
   };
 
   return (
