@@ -120,3 +120,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility t1 {
+  @apply text-4xl md:text-5xl font-bold transition-all duration-300 ease-in-out;
+}
+
+@utility t2 {
+  @apply text-3xl md:text-4xl font-semibold transition-all duration-300 ease-in-out;
+}
+
+@utility t3 {
+  @apply text-2xl md:text-3xl font-semibold transition-all duration-300 ease-in-out;
+}
+
+@utility t4 {
+  @apply text-xl md:text-2xl font-medium transition-all duration-300 ease-in-out;
+}
+
+@utility p1 {
+  @apply text-base md:text-lg font-normal transition-all duration-300 ease-in-out;
+}
+
+@utility p2 {
+  @apply text-sm md:text-base font-normal transition-all duration-300 ease-in-out;
+}
