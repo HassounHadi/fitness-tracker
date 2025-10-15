@@ -47,7 +47,7 @@ export default function LoginPage() {
       } catch {
         alert("Login failed. Please try again.");
       }
-    } else alert("Logged in successfully!");
+    } else router.push("/dashboard");
   };
 
   return (
