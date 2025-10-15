@@ -4,6 +4,11 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyToken,
+} from "@/lib/jwt";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -36,20 +41,69 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+
   session: {
-    strategy: "jwt" as const, // ✅ fixes "Type 'string' is not assignable"
+    strategy: "jwt",
   },
+
   callbacks: {
-    async session({ session, token }: any) {
-      // ✅ fixes "Binding element 'session' implicitly has an 'any' type"
-      if (token?.sub && session.user) {
-        (session.user as any).id = token.sub;
+    async jwt({ token, user }) {
+      // On initial login
+      if (user && user.id && user.email) {
+        const safeUser = { id: user.id, email: user.email as string };
+        const accessToken = generateAccessToken(safeUser);
+        const refreshToken = generateRefreshToken(safeUser);
+
+        token.accessToken = accessToken;
+        token.refreshToken = refreshToken;
+        token.accessTokenExpires = Date.now() + 15 * 60 * 1000; // 15 min
       }
+
+      // If access token not expired, return it
+      if (Date.now() < (token.accessTokenExpires as number)) return token;
+
+      // Otherwise refresh it
+      const refreshed = await refreshAccessToken(token);
+      return refreshed;
+    },
+
+    async session({ session, token }) {
+      session.user.id = token.sub ?? "";
+      session.accessToken = token.accessToken;
+      session.refreshToken = token.refreshToken;
+      session.accessTokenExpires = token.accessTokenExpires;
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+async function refreshAccessToken(token: any) {
+  try {
+    const decoded = verifyToken(
+      token.refreshToken,
+      process.env.JWT_REFRESH_SECRET!
+    );
+    if (!decoded) throw new Error("Invalid refresh token");
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.sub },
+    });
+    if (!user) throw new Error("User not found");
+
+    const newAccessToken = generateAccessToken(user);
+
+    return {
+      ...token,
+      accessToken: newAccessToken,
+      accessTokenExpires: Date.now() + 15 * 60 * 1000,
+    };
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+    return { ...token, error: "RefreshAccessTokenError" };
+  }
+}
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
