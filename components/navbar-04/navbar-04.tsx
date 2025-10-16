@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "./logo";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { NavMenu } from "./nav-menu";
+import { NavigationSheet } from "./navigation-sheet";
 
 const Navbar = () => {
   const { data: session, status } = useSession();
@@ -13,8 +15,8 @@ const Navbar = () => {
       <div className="h-full flex items-center justify-between mx-auto px-6 md:px-10">
         <Logo />
 
-        {/* Desktop Menu */}
-        {/* <NavMenu className="hidden md:block" /> */}
+        {/* Desktop Menu - Show only when logged in */}
+        {session && <NavMenu className="hidden md:block" />}
 
         <div className="flex items-center gap-3">
           {status === "loading" ? (
@@ -22,9 +24,15 @@ const Navbar = () => {
             <div className="h-10 w-32 bg-muted animate-pulse rounded-md" />
           ) : session ? (
             // User is logged in
-            <Button variant="secondary" onClick={() => signOut()}>
-              Sign Out
-            </Button>
+            <>
+              <Button variant="secondary" onClick={() => signOut()}>
+                Sign Out
+              </Button>
+              {/* Mobile Menu - Show only when logged in */}
+              <div className="md:hidden">
+                <NavigationSheet />
+              </div>
+            </>
           ) : (
             // User is not logged in
             <>
@@ -38,11 +46,6 @@ const Navbar = () => {
               </Link>
             </>
           )}
-
-          {/* Mobile Menu */}
-          {/* <div className="md:hidden">
-              <NavigationSheet />
-            </div> */}
         </div>
       </div>
     </nav>

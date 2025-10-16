@@ -1,3 +1,5 @@
+"use client";
+
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -6,30 +8,41 @@ import {
 } from "@/components/ui/navigation-menu";
 import Link from "next/link";
 import { ComponentProps } from "react";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
-export const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => (
-  <NavigationMenu {...props}>
-    <NavigationMenuList className="gap-3 space-x-0 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-start data-[orientation=vertical]:justify-start">
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link href="#">Home</Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link href="#">Blog</Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link href="#">About</Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link href="#">Contact Us</Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-    </NavigationMenuList>
-  </NavigationMenu>
-);
+export const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => {
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/exercises", label: "Exercises" },
+    { href: "/workouts", label: "Workouts" },
+    { href: "/progress", label: "Progress" },
+    { href: "/nutrition", label: "Nutrition" },
+  ];
+
+  return (
+    <NavigationMenu {...props}>
+      <NavigationMenuList className="gap-3 space-x-0 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-start data-[orientation=vertical]:justify-start">
+        {navItems.map((item) => (
+          <NavigationMenuItem key={item.href}>
+            <NavigationMenuLink asChild>
+              <Link
+                href={item.href}
+                className={cn(
+                  "transition-colors",
+                  pathname === item.href
+                    ? "!text-primary font-medium hover:bg-transparent"
+                    : "!text-muted-foreground hover:bg-accent/50"
+                )}
+              >
+                {item.label}
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        ))}
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
+};

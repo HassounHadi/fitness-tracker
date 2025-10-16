@@ -1,21 +1,213 @@
-"use client";
-import { useSession } from "next-auth/react";
-export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  if (status === "loading") return <p>Loading...</p>;
+import { StatCard } from "@/components/dashboard/stat-card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dumbbell,
+  Target,
+  Flame,
+  TrendingUp,
+  Calendar,
+  Apple,
+  Plus,
+} from "lucide-react";
 
+export default function DashboardPage() {
   return (
-    <div>
-      <h2 className="text-2xl font-bold">Dashboard</h2>
-      <p>Welcome, {session?.user.email}!</p>
-      <br />
-      <p>Your access token is: {session?.accessToken}</p>
-      <br />
-      <p>Your refresh token is: {session?.refreshToken}</p>
-      <br />
-      <p>Your user ID is: {session?.user.id}</p>
-      <br />
-      <p>Your whole session is: {JSON.stringify(session)}</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="t1">Welcome back!</h1>
+          <p className="p1 text-muted-foreground mt-2">
+            Here's your fitness overview for today
+          </p>
+        </div>
+        <Button className="gap-2">
+          <Plus className="h-4 w-4" />
+          Quick Log Workout
+        </Button>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Workouts This Week"
+          value="4"
+          description="2 more to hit your goal"
+          icon={Dumbbell}
+          trend={{ value: 20, isPositive: true }}
+        />
+        <StatCard
+          title="Current Weight"
+          value="75 kg"
+          description="Target: 72 kg"
+          icon={Target}
+          trend={{ value: 2, isPositive: false }}
+        />
+        <StatCard
+          title="Calories Today"
+          value="1,850"
+          description="450 remaining"
+          icon={Flame}
+        />
+        <StatCard
+          title="Weekly Progress"
+          value="85%"
+          description="Great job this week!"
+          icon={TrendingUp}
+          trend={{ value: 15, isPositive: true }}
+        />
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Today's Workout */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              Today's Workout
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                <div className="flex-1">
+                  <h4 className="t4">Upper Body Strength</h4>
+                  <p className="p2 text-muted-foreground mt-1">
+                    5 exercises • 45 min
+                  </p>
+                </div>
+                <Button size="sm">Start</Button>
+              </div>
+              <div className="text-center py-4">
+                <p className="p2 text-muted-foreground">
+                  No workout scheduled?{" "}
+                  <Button variant="link" className="p-0 h-auto p2">
+                    Generate AI Workout
+                  </Button>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-secondary" />
+              Recent Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[
+                {
+                  title: "Leg Day Workout",
+                  time: "2 hours ago",
+                  stats: "6 exercises • 50 min",
+                },
+                {
+                  title: "Morning Run",
+                  time: "Yesterday",
+                  stats: "5.2 km • 28 min",
+                },
+                {
+                  title: "Chest & Triceps",
+                  time: "2 days ago",
+                  stats: "7 exercises • 45 min",
+                },
+              ].map((activity, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                >
+                  <div>
+                    <p className="p2 font-medium">{activity.title}</p>
+                    <p className="p3 text-muted-foreground">{activity.stats}</p>
+                  </div>
+                  <p className="p3 text-muted-foreground">{activity.time}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Nutrition Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Apple className="h-5 w-5 text-accent" />
+              Today's Nutrition
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between p2">
+                  <span className="text-muted-foreground">Protein</span>
+                  <span className="font-medium">120g / 150g</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary w-[80%]" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between p2">
+                  <span className="text-muted-foreground">Carbs</span>
+                  <span className="font-medium">180g / 200g</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-secondary w-[90%]" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between p2">
+                  <span className="text-muted-foreground">Fats</span>
+                  <span className="font-medium">55g / 60g</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-accent w-[92%]" />
+                </div>
+              </div>
+
+              <Button variant="outline" className="w-full mt-4">
+                Log Meal
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+                <Dumbbell className="h-6 w-6 text-primary" />
+                <span className="p2">Browse Exercises</span>
+              </Button>
+              <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+                <Target className="h-6 w-6 text-secondary" />
+                <span className="p2">Set New Goal</span>
+              </Button>
+              <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+                <Calendar className="h-6 w-6 text-accent" />
+                <span className="p2">Schedule Workout</span>
+              </Button>
+              <Button variant="outline" className="h-auto flex-col gap-2 py-4">
+                <TrendingUp className="h-6 w-6 text-info" />
+                <span className="p2">View Progress</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
