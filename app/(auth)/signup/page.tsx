@@ -10,6 +10,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { GoogleIcon } from "@/public/icons/GoogleIcon";
+import { toast } from "sonner";
 
 const signupSchema = z
   .object({
@@ -47,13 +48,18 @@ export default function SignupPage() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Signup failed");
+        toast.error("Signup failed", {
+          description: error.message || "Please try again.",
+        });
+        return;
       }
 
       // Redirect to login page after successful signup
       router.push("/login?signup=success");
     } catch (error: any) {
-      alert(error.message);
+      toast.error("Signup failed", {
+        description: error.message || "Please try again.",
+      });
     }
   };
 

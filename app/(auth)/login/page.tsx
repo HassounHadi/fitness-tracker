@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GoogleIcon } from "@/public/icons/GoogleIcon";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -22,6 +24,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     register,
@@ -30,6 +33,14 @@ export default function LoginPage() {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
+
+  useEffect(() => {
+    if (searchParams.get("signup") === "success") {
+      toast.success("Account created successfully!", {
+        description: "Please log in to continue.",
+      });
+    }
+  }, [searchParams]);
 
   const onSubmit = async (data: LoginForm) => {
     const res = await signIn("credentials", {
@@ -42,12 +53,18 @@ export default function LoginPage() {
       try {
         const errorResponse = await fetch(`/api/auth/error?error=${res.error}`);
         const errorData = await errorResponse.json();
-        alert(errorData.message || "Something went wrong.");
-        console.log(errorData.message);
+        toast.error("Login failed", {
+          description: errorData.message || "Something went wrong.",
+        });
       } catch {
-        alert("Login failed. Please try again.");
+        toast.error("Login failed", {
+          description: "Please try again.",
+        });
       }
-    } else router.push("/dashboard");
+    } else {
+      toast.success("Welcome back!");
+      router.push("/dashboard");
+    }
   };
 
   return (

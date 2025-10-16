@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar-04/navbar-04";
 import { Inter } from "next/font/google";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <Navbar />
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
+        <Toaster />
       </body>
     </html>
   );
