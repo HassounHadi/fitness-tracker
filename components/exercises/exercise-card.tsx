@@ -33,7 +33,7 @@ export function ExerciseCard({
   };
 
   return (
-    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50">
+    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50 py-0">
       <CardContent className="p-0">
         {/* GIF Container */}
         <div className="relative aspect-square bg-muted overflow-hidden">
@@ -55,7 +55,9 @@ export function ExerciseCard({
         {/* Exercise Info */}
         <div className="p-4 space-y-3">
           {/* Title */}
-          <h3 className="t4 font-semibold capitalize line-clamp-2">{name}</h3>
+          <h3 className="t4 text-primary font-semibold capitalize line-clamp-2">
+            {name}
+          </h3>
 
           {/* Badges */}
           <div className="flex flex-wrap gap-2">

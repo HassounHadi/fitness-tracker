@@ -1,16 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import type { Exercise } from "@prisma/client";
 
-export interface Exercise {
-  id: string;
-  name: string;
-  gifUrl: string;
-  bodyPart: string;
-  equipment: string;
-  target: string;
-  secondaryMuscles: string[];
-  instructions: string[];
-}
+export type { Exercise };
 
 export interface ExerciseFilters {
   search?: string;
