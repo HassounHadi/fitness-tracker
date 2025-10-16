@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, X } from "lucide-react";
+import { useExerciseFilters } from "@/hooks/use-exercises";
 
 export interface ExerciseFiltersProps {
   searchQuery: string;
@@ -20,72 +21,6 @@ export interface ExerciseFiltersProps {
   onClearFilters: () => void;
 }
 
-const filterOptions = {
-  bodyParts: [
-    "back",
-    "cardio",
-    "chest",
-    "lower arms",
-    "lower legs",
-    "neck",
-    "shoulders",
-    "upper arms",
-    "upper legs",
-    "waist",
-  ],
-  equipment: [
-    "assisted",
-    "band",
-    "barbell",
-    "body weight",
-    "bosu ball",
-    "cable",
-    "dumbbell",
-    "elliptical machine",
-    "ez barbell",
-    "hammer",
-    "kettlebell",
-    "leverage machine",
-    "medicine ball",
-    "olympic barbell",
-    "resistance band",
-    "roller",
-    "rope",
-    "skierg machine",
-    "sled machine",
-    "smith machine",
-    "stability ball",
-    "stationary bike",
-    "stepmill machine",
-    "tire",
-    "trap bar",
-    "upper body ergometer",
-    "weighted",
-    "wheel roller",
-  ],
-  targets: [
-    "abs",
-    "adductors",
-    "abductors",
-    "biceps",
-    "calves",
-    "cardiovascular system",
-    "delts",
-    "forearms",
-    "glutes",
-    "hamstrings",
-    "lats",
-    "levator scapulae",
-    "pectorals",
-    "quads",
-    "serratus anterior",
-    "spine",
-    "traps",
-    "triceps",
-    "upper back",
-  ],
-};
-
 export function ExerciseFilters({
   searchQuery,
   onSearchChange,
@@ -99,6 +34,10 @@ export function ExerciseFilters({
   onToggleFilters,
   onClearFilters,
 }: ExerciseFiltersProps) {
+  // Fetch filter options from API
+  const { data: filterOptions, isLoading: isLoadingFilters } =
+    useExerciseFilters();
+
   const hasActiveFilters =
     searchQuery || selectedBodyPart || selectedEquipment || selectedTarget;
 
@@ -188,70 +127,82 @@ export function ExerciseFilters({
       {showFilters && (
         <Card>
           <CardContent className="pt-6">
-            <div className="grid gap-6 md:grid-cols-3">
-              {/* Body Part Filter */}
-              <div className="space-y-3">
-                <h3 className="t4 font-semibold">Body Part</h3>
-                <div className="flex flex-wrap gap-2">
-                  {filterOptions.bodyParts.map((part) => (
-                    <Badge
-                      key={part}
-                      variant={
-                        selectedBodyPart === part ? "default" : "outline"
-                      }
-                      className="cursor-pointer capitalize hover:bg-primary hover:text-primary-foreground transition-colors"
-                      onClick={() =>
-                        onBodyPartChange(selectedBodyPart === part ? null : part)
-                      }
-                    >
-                      {part}
-                    </Badge>
-                  ))}
-                </div>
+            {isLoadingFilters ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-3">
+                {/* Body Part Filter */}
+                <div className="space-y-3">
+                  <h3 className="t4 font-semibold">Body Part</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {filterOptions?.bodyParts.map((part) => (
+                      <Badge
+                        key={part}
+                        variant={
+                          selectedBodyPart === part ? "default" : "outline"
+                        }
+                        className="cursor-pointer capitalize hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() =>
+                          onBodyPartChange(
+                            selectedBodyPart === part ? null : part
+                          )
+                        }
+                      >
+                        {part}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
 
-              {/* Equipment Filter */}
-              <div className="space-y-3">
-                <h3 className="t4 font-semibold">Equipment</h3>
-                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
-                  {filterOptions.equipment.map((equip) => (
-                    <Badge
-                      key={equip}
-                      variant={
-                        selectedEquipment === equip ? "default" : "outline"
-                      }
-                      className="cursor-pointer capitalize hover:bg-primary hover:text-primary-foreground transition-colors"
-                      onClick={() =>
-                        onEquipmentChange(
-                          selectedEquipment === equip ? null : equip
-                        )
-                      }
-                    >
-                      {equip}
-                    </Badge>
-                  ))}
+                {/* Equipment Filter */}
+                <div className="space-y-3">
+                  <h3 className="t4 font-semibold">Equipment</h3>
+                  <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+                    {filterOptions?.equipments.map((equip) => (
+                      <Badge
+                        key={equip}
+                        variant={
+                          selectedEquipment === equip ? "default" : "outline"
+                        }
+                        className="cursor-pointer capitalize hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() =>
+                          onEquipmentChange(
+                            selectedEquipment === equip ? null : equip
+                          )
+                        }
+                      >
+                        {equip}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Target Muscle Filter */}
-              <div className="space-y-3">
-                <h3 className="t4 font-semibold">Target Muscle</h3>
-                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
-                  {filterOptions.targets.map((target) => (
-                    <Badge
-                      key={target}
-                      variant={selectedTarget === target ? "default" : "outline"}
-                      className="cursor-pointer capitalize hover:bg-primary hover:text-primary-foreground transition-colors"
-                      onClick={() =>
-                        onTargetChange(selectedTarget === target ? null : target)
-                      }
-                    >
-                      {target}
-                    </Badge>
-                  ))}
+                {/* Target Muscle Filter */}
+                <div className="space-y-3">
+                  <h3 className="t4 font-semibold">Target Muscle</h3>
+                  <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+                    {filterOptions?.targets.map((target) => (
+                      <Badge
+                        key={target}
+                        variant={
+                          selectedTarget === target ? "default" : "outline"
+                        }
+                        className="cursor-pointer capitalize hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() =>
+                          onTargetChange(
+                            selectedTarget === target ? null : target
+                          )
+                        }
+                      >
+                        {target}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}

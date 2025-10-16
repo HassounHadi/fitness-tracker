@@ -8,10 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { GoogleIcon } from "@/public/icons/GoogleIcon";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { useLogin } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -23,13 +24,13 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const loginMutation = useLogin();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
@@ -42,38 +43,8 @@ export default function LoginPage() {
     }
   }, [searchParams]);
 
-  const onSubmit = async (data: LoginForm) => {
-    const res = await signIn("credentials", {
-      redirect: false,
-      email: data.email,
-      password: data.password,
-    });
-
-    if (res?.error) {
-      try {
-        const errorResponse = await fetch(`/api/auth/error?error=${res.error}`);
-        const errorData = await errorResponse.json();
-        toast.error("Login failed", {
-          description: errorData.message || "Something went wrong.",
-        });
-      } catch {
-        toast.error("Login failed", {
-          description: "Please try again.",
-        });
-      }
-    } else {
-      // Get session to check onboarding status
-      const sessionRes = await fetch("/api/auth/session");
-      const session = await sessionRes.json();
-
-      if (session && !session.isOnboarded) {
-        toast.success("Welcome! Let's set up your profile");
-        router.push("/onboarding");
-      } else {
-        toast.success("Welcome back!");
-        router.push("/dashboard");
-      }
-    }
+  const onSubmit = (data: LoginForm) => {
+    loginMutation.mutate(data);
   };
 
   return (
@@ -122,7 +93,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full"
-              loading={isSubmitting}
+              loading={loginMutation.isPending}
               loadingText="Logging in..."
             >
               Log In

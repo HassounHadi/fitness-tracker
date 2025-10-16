@@ -8,9 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { GoogleIcon } from "@/public/icons/GoogleIcon";
-import { toast } from "sonner";
+import { useSignup } from "@/hooks/use-auth";
 
 const signupSchema = z
   .object({
@@ -28,39 +27,22 @@ const signupSchema = z
 type SignupForm = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
-  const router = useRouter();
+  const signupMutation = useSignup();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
   });
 
-  const onSubmit = async (data: SignupForm) => {
-    try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: data.email, password: data.password }),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        toast.error("Signup failed", {
-          description: error.message || "Please try again.",
-        });
-        return;
-      }
-
-      // Redirect to login page after successful signup
-      router.push("/login?signup=success");
-    } catch (error: any) {
-      toast.error("Signup failed", {
-        description: error.message || "Please try again.",
-      });
-    }
+  const onSubmit = (data: SignupForm) => {
+    signupMutation.mutate({
+      name: data.email.split("@")[0], // Default name from email
+      email: data.email,
+      password: data.password,
+    });
   };
 
   return (
@@ -123,7 +105,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               className="w-full"
-              loading={isSubmitting}
+              loading={signupMutation.isPending}
               loadingText="Signing up..."
             >
               Sign Up

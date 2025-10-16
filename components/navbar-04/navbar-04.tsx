@@ -3,12 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Logo } from "./logo";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { NavMenu } from "./nav-menu";
 import { NavigationSheet } from "./navigation-sheet";
+import { useLogout } from "@/hooks/use-auth";
 
 const Navbar = () => {
   const { data: session, status } = useSession();
+  const logoutMutation = useLogout();
 
   return (
     <nav className="fixed top-6 inset-x-4 h-16 bg-background border dark:border-slate-700/70 mx-auto max-w-(--breakpoint-xl) rounded-full z-20 shadow-lg">
@@ -25,7 +27,11 @@ const Navbar = () => {
           ) : session ? (
             // User is logged in
             <>
-              <Button variant="secondary" onClick={() => signOut()}>
+              <Button
+                variant="secondary"
+                onClick={() => logoutMutation.mutate()}
+                loading={logoutMutation.isPending}
+              >
                 Sign Out
               </Button>
               {/* Mobile Menu - Show only when logged in */}

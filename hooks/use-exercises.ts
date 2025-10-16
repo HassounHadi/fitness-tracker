@@ -19,6 +19,12 @@ export interface ExerciseFilters {
   target?: string;
 }
 
+export interface ExerciseFilterOptions {
+  bodyParts: string[];
+  equipments: string[];
+  targets: string[];
+}
+
 // Fetch all exercises with optional filters
 export function useExercises(filters?: ExerciseFilters) {
   return useQuery({
@@ -56,5 +62,23 @@ export function useExercise(id: string) {
       throw new Error(response.message || "Failed to fetch exercise");
     },
     enabled: !!id,
+  });
+}
+
+// Fetch available filter options
+export function useExerciseFilters() {
+  return useQuery({
+    queryKey: ["exercise-filters"],
+    queryFn: async () => {
+      const response = await api.get<ExerciseFilterOptions>(
+        "/api/exercises/filters",
+        { showToast: false }
+      );
+
+      if (response.success && response.data) return response.data;
+
+      throw new Error(response.message || "Failed to fetch filters");
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes - filters don't change often
   });
 }
