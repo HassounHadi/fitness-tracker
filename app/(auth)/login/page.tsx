@@ -93,8 +93,13 @@ export default function LoginPage() {
             </div>
 
             {/* Submit */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Logging in..." : "Log In"}
+            <Button
+              type="submit"
+              className="w-full"
+              loading={isSubmitting}
+              loadingText="Logging in..."
+            >
+              Log In
             </Button>
 
             <Button

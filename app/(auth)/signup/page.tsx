@@ -110,8 +110,13 @@ export default function SignupPage() {
             </div>
 
             {/* Submit */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Signing up..." : "Sign Up"}
+            <Button
+              type="submit"
+              className="w-full"
+              loading={isSubmitting}
+              loadingText="Signing up..."
+            >
+              Sign Up
             </Button>
             <Button
               variant="ghost"
