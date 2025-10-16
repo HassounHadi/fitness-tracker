@@ -59,6 +59,11 @@ export const authOptions: NextAuthOptions = {
         token.accessTokenExpires = Date.now() + 15 * 60 * 1000; // 15 min
       }
 
+      // If token has error (user deleted), return null to force re-login
+      if (token.error) {
+        return null as any;
+      }
+
       // If access token not expired, return it
       if (Date.now() < (token.accessTokenExpires as number)) return token;
 
@@ -68,12 +73,22 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
+      // If token has error (user deleted), return null to force re-login
+      if (token?.error) {
+        return null as any;
+      }
+
       session.user.id = token.sub ?? "";
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
       session.accessTokenExpires = token.accessTokenExpires;
       return session;
     },
+  },
+
+  pages: {
+    signIn: '/login',
+    error: '/login',
   },
 
   secret: process.env.NEXTAUTH_SECRET,
