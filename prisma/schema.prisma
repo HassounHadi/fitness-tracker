@@ -8,10 +8,264 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ==================== Authentication Models ====================
+
 model User {
   id            String    @id @default(cuid())
-  email         String    @unique
-  password      String
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+
+  // User profile and preferences
+  fitnessGoal   String?   // e.g., "build_muscle", "lose_weight", "general_fitness"
+  fitnessLevel  String?   // e.g., "beginner", "intermediate", "advanced"
+  availableEquipment String[] // Array of equipment available to user
+
+  // Physical stats (for tracking)
+  height        Float?    // in cm
+  currentWeight Float?    // in kg
+  targetWeight  Float?    // in kg
+
+  // Dietary preferences
+  dailyCalorieGoal Int?
+  proteinGoal   Int?      // in grams
+  carbGoal      Int?      // in grams
+  fatGoal       Int?      // in grams
+
+  // Relations
+  accounts         Account[]
+  sessions         Session[]
+  savedExercises   SavedExercise[]
+  workoutTemplates WorkoutTemplate[]
+  workoutLogs      WorkoutLog[]
+  progressLogs     ProgressLog[]
+  nutritionLogs    NutritionLog[]
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==================== Exercise Models ====================
+
+model Exercise {
+  id           String   @id @default(cuid())
+  apiId        String   @unique  // ID from ExerciseDB API
+  name         String
+  gifUrl       String
+  bodyPart     String   // e.g., "chest", "back", "legs"
+  equipment    String   // e.g., "barbell", "dumbbell", "bodyweight"
+  target       String   // Target muscle group
+  instructions String[] // Array of instruction steps
+
+  // Relations
+  savedBy          SavedExercise[]
+  templateExercises TemplateExercise[]
+  loggedExercises  LoggedExercise[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([bodyPart])
+  @@index([equipment])
+  @@index([target])
+  @@index([name])
+}
+
+model SavedExercise {
+  id         String   @id @default(cuid())
+  userId     String
+  exerciseId String
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, exerciseId])
+  @@index([userId])
+}
+
+// ==================== Workout Template Models ====================
+
+model WorkoutTemplate {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isAiGenerated Boolean @default(false)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises   TemplateExercise[]
+  workoutLogs WorkoutLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model TemplateExercise {
+  id         String   @id @default(cuid())
+  templateId String
+  exerciseId String
+  order      Int      // Order in the workout
+  sets       Int
+  reps       Int
+  restTime   Int      // Rest time in seconds
+  notes      String?
+
+  template   WorkoutTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@index([templateId])
+}
+
+// ==================== Workout Logging Models ====================
+
+model WorkoutLog {
+  id          String   @id @default(cuid())
+  userId      String
+  templateId  String?
+  date        DateTime @default(now())
+  name        String
+  duration    Int?     // Duration in minutes
+  notes       String?
+  completed   Boolean  @default(false)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    WorkoutTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  exercises   LoggedExercise[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
+}
+
+model LoggedExercise {
+  id          String   @id @default(cuid())
+  workoutLogId String
+  exerciseId  String
+  order       Int
+  notes       String?
+
+  workoutLog  WorkoutLog @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  sets        LoggedSet[]
+
+  createdAt   DateTime @default(now())
+
+  @@index([workoutLogId])
+}
+
+model LoggedSet {
+  id               String   @id @default(cuid())
+  loggedExerciseId String
+  setNumber        Int
+  reps             Int
+  weight           Float?   // Weight in kg
+  completed        Boolean  @default(false)
+
+  loggedExercise   LoggedExercise @relation(fields: [loggedExerciseId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+
+  @@index([loggedExerciseId])
+}
+
+// ==================== Progress Tracking Models ====================
+
+model ProgressLog {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @default(now())
+  weight      Float?   // in kg
+  bodyFat     Float?   // percentage
+
+  // Measurements in cm
+  chest       Float?
+  waist       Float?
+  hips        Float?
+  biceps      Float?
+  thighs      Float?
+
+  // Photos
+  photoUrl    String?
+
+  notes       String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([date])
+}
+
+// ==================== Nutrition Models ====================
+
+model NutritionLog {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @default(now())
+  mealName    String?  // e.g., "breakfast", "lunch", "dinner", "snack"
+  description String   // Natural language description
+
+  // Macros
+  calories    Int
+  protein     Int      // in grams
+  carbs       Int      // in grams
+  fat         Int      // in grams
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([date])
 }
