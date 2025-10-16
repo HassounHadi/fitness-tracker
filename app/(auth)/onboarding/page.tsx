@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { api } from "@/lib/api-client";
 
 // Step 1: Profile Information
 const profileSchema = z.object({
@@ -98,8 +99,6 @@ export default function OnboardingPage() {
   };
 
   const onEquipmentSubmit = async (data: EquipmentForm) => {
-    console.log("Step 3:", data);
-
     // Combine all data from all steps
     const completeData = {
       ...profileForm.getValues(),
@@ -114,11 +113,12 @@ export default function OnboardingPage() {
       fatGoal: parseInt(data.fatGoal),
     };
 
-    console.log("Complete onboarding data:", completeData);
+    // Send to API endpoint
+    const response = await api.post("/api/user/onboarding", completeData);
 
-    // TODO: Send to API endpoint
-    // For now, just redirect to dashboard
-    router.push("/dashboard");
+    if (response.success) {
+      router.push("/dashboard");
+    }
   };
 
   const toggleEquipment = (equipment: string) => {
