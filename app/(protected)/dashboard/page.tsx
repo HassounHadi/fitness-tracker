@@ -1,3 +1,5 @@
+"use client";
+
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +12,33 @@ import {
   Apple,
   Plus,
 } from "lucide-react";
+import { CircularRings } from "@/components/ui/circular-rings";
 
 export default function DashboardPage() {
+  const nutritionRings = [
+    {
+      name: "Protein",
+      actual: 120,
+      goal: 150,
+      color: "#3b82f6",
+      unit: "g",
+    },
+    {
+      name: "Carbs",
+      actual: 180,
+      goal: 200,
+      color: "#10b981",
+      unit: "g",
+    },
+    {
+      name: "Fats",
+      actual: 55,
+      goal: 60,
+      color: "#f59e0b",
+      unit: "g",
+    },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -143,41 +170,17 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between p2">
-                  <span className="text-muted-foreground">Protein</span>
-                  <span className="font-medium">120g / 150g</span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary w-[80%]" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between p2">
-                  <span className="text-muted-foreground">Carbs</span>
-                  <span className="font-medium">180g / 200g</span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-secondary w-[90%]" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between p2">
-                  <span className="text-muted-foreground">Fats</span>
-                  <span className="font-medium">55g / 60g</span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-accent w-[92%]" />
-                </div>
-              </div>
-
-              <Button variant="outline" className="w-full mt-4">
-                Log Meal
-              </Button>
-            </div>
+            <CircularRings
+              rings={nutritionRings}
+              centerContent={{
+                label: "Calories",
+                actual: 1850,
+                goal: 2000,
+              }}
+            />
+            <Button variant="outline" className="w-full mt-6">
+              Log Meal
+            </Button>
           </CardContent>
         </Card>
 
