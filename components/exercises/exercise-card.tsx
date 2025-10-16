@@ -3,33 +3,32 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, Info } from "lucide-react";
+import { Info, Plus, Check } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { useWorkoutBuilder } from "@/contexts/workout-builder-context";
+import type { Exercise } from "@prisma/client";
 
 export interface ExerciseCardProps {
-  id: string;
-  name: string;
-  gifUrl: string;
-  bodyPart: string;
-  equipment: string;
-  target: string;
+  exercise: Exercise;
   onViewDetails?: (id: string) => void;
 }
 
 export function ExerciseCard({
-  id,
-  name,
-  gifUrl,
-  bodyPart,
-  equipment,
-  target,
+  exercise,
   onViewDetails,
 }: ExerciseCardProps) {
   const [imageError, setImageError] = useState(false);
+  const { exercises, addExercise } = useWorkoutBuilder();
+
+  const isInWorkout = exercises.some((item) => item.exercise.id === exercise.id);
 
   const handleViewDetails = () => {
-    onViewDetails?.(id);
+    onViewDetails?.(exercise.id);
+  };
+
+  const handleAddToWorkout = () => {
+    addExercise(exercise);
   };
 
   return (
@@ -39,8 +38,8 @@ export function ExerciseCard({
         <div className="relative aspect-square bg-muted overflow-hidden">
           {!imageError ? (
             <Image
-              src={gifUrl}
-              alt={name}
+              src={exercise.gifUrl}
+              alt={exercise.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               onError={() => setImageError(true)}
@@ -56,34 +55,53 @@ export function ExerciseCard({
         <div className="p-4 space-y-3">
           {/* Title */}
           <h3 className="t4 text-primary font-semibold capitalize line-clamp-2">
-            {name}
+            {exercise.name}
           </h3>
 
           {/* Badges */}
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary" className="capitalize">
-              {bodyPart}
+              {exercise.bodyPart}
             </Badge>
             <Badge variant="outline" className="capitalize">
-              {equipment}
+              {exercise.equipment}
             </Badge>
           </div>
 
           {/* Target Muscle */}
           <p className="p3 text-muted-foreground capitalize">
             Target:{" "}
-            <span className="text-foreground font-medium">{target}</span>
+            <span className="text-foreground font-medium">{exercise.target}</span>
           </p>
 
-          {/* View Details Button */}
-          <Button
-            variant="secondary"
-            className="w-full gap-2"
-            onClick={handleViewDetails}
-          >
-            <Info className="h-4 w-4" />
-            View Details
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex-1 gap-2"
+              onClick={handleViewDetails}
+            >
+              <Info className="h-4 w-4" />
+              Details
+            </Button>
+            <Button
+              className="flex-1 gap-2"
+              onClick={handleAddToWorkout}
+              disabled={isInWorkout}
+            >
+              {isInWorkout ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Added
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Add
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

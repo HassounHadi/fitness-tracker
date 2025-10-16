@@ -1,16 +1,7 @@
 "use client";
 
 import { ExerciseCard } from "./exercise-card";
-
-export interface Exercise {
-  id: string;
-  name: string;
-  gifUrl: string;
-  bodyPart: string;
-  equipment: string;
-  target: string;
-  isSaved?: boolean;
-}
+import type { Exercise } from "@prisma/client";
 
 export interface ExerciseGridProps {
   exercises: Exercise[];
@@ -33,7 +24,7 @@ export function ExerciseGrid({ exercises, onViewDetails }: ExerciseGridProps) {
       {exercises.map((exercise) => (
         <ExerciseCard
           key={exercise.id}
-          {...exercise}
+          exercise={exercise}
           onViewDetails={onViewDetails}
         />
       ))}
