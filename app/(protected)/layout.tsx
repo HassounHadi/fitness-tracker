@@ -13,7 +13,6 @@ export default async function ProtectedLayout({
 }: ProtectedLayoutProps) {
   const session = await getServerSession(authOptions);
 
-  // Redirect to login if not authenticated or tokens missing
   if (!session || !session.accessToken || !session.refreshToken) {
     redirect("/login");
   }
