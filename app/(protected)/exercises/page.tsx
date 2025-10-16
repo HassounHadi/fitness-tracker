@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { ExerciseFilters } from "@/components/exercises/exercise-filters";
 import { ExerciseGrid } from "@/components/exercises/exercise-grid";
 import { useExercises } from "@/hooks/use-exercises";
+import { Loader2 } from "lucide-react";
 
 export default function ExercisesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,7 +69,7 @@ export default function ExercisesPage() {
       {/* Loading State */}
       {isLoading && (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <Loader2 className="h-20 w-20 animate-spin text-primary" />
         </div>
       )}
 
@@ -81,10 +82,7 @@ export default function ExercisesPage() {
 
       {/* Exercise Grid */}
       {!isLoading && !error && (
-        <ExerciseGrid
-          exercises={exercises}
-          onViewDetails={handleViewDetails}
-        />
+        <ExerciseGrid exercises={exercises} onViewDetails={handleViewDetails} />
       )}
     </div>
   );
