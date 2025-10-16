@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { ExerciseFilters } from "@/components/exercises/exercise-filters";
 import { ExerciseGrid } from "@/components/exercises/exercise-grid";
 import { useExercises } from "@/hooks/use-exercises";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Loader2 } from "lucide-react";
 
 export default function ExercisesPage() {
@@ -15,15 +16,18 @@ export default function ExercisesPage() {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Debounce search query
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
   // Build filters object for React Query
   const filters = useMemo(
     () => ({
-      search: searchQuery || undefined,
+      search: debouncedSearchQuery || undefined,
       bodyPart: selectedBodyPart || undefined,
       equipment: selectedEquipment || undefined,
       target: selectedTarget || undefined,
     }),
-    [searchQuery, selectedBodyPart, selectedEquipment, selectedTarget]
+    [debouncedSearchQuery, selectedBodyPart, selectedEquipment, selectedTarget]
   );
 
   // Fetch exercises using React Query

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter, X, Loader2 } from "lucide-react";
 import { useExerciseFilters } from "@/hooks/use-exercises";
 
 export interface ExerciseFiltersProps {
@@ -125,11 +125,11 @@ export function ExerciseFilters({
 
       {/* Filters Panel */}
       {showFilters && (
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="py-4">
+          <CardContent>
             {isLoadingFilters ? (
               <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-3">

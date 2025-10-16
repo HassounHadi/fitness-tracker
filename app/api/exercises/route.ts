@@ -14,10 +14,30 @@ export async function GET(req: NextRequest) {
     const where: any = {};
 
     if (search) {
-      where.name = {
-        contains: search,
-        mode: "insensitive",
-      };
+      // Normalize search: remove extra spaces, handle hyphens and spaces
+      const normalizedSearch = search.trim().toLowerCase();
+
+      // Search by replacing spaces/hyphens interchangeably
+      where.OR = [
+        {
+          name: {
+            contains: normalizedSearch,
+            mode: "insensitive",
+          },
+        },
+        {
+          name: {
+            contains: normalizedSearch.replace(/\s+/g, "-"),
+            mode: "insensitive",
+          },
+        },
+        {
+          name: {
+            contains: normalizedSearch.replace(/-/g, " "),
+            mode: "insensitive",
+          },
+        },
+      ];
     }
 
     if (bodyPart) {
