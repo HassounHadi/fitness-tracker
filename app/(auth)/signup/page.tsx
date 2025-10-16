@@ -116,7 +116,7 @@ export default function SignupPage() {
             <Button
               variant="ghost"
               className="w-full mt-2 text-foreground border border-border hover:scale-100 hover:bg-accent/5 hover:text-accent hover:border-accent"
-              onClick={() => signIn("google")}
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
             >
               <GoogleIcon className="w-5 h-5 mr-3" />
               Sign up with Google
