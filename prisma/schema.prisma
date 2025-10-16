@@ -90,14 +90,15 @@ model VerificationToken {
 // ==================== Exercise Models ====================
 
 model Exercise {
-  id           String   @id @default(cuid())
-  apiId        String   @unique  // ID from ExerciseDB API
-  name         String
-  gifUrl       String
-  bodyPart     String   // e.g., "chest", "back", "legs"
-  equipment    String   // e.g., "barbell", "dumbbell", "bodyweight"
-  target       String   // Target muscle group
-  instructions String[] // Array of instruction steps
+  id              String   @id @default(cuid())
+  apiId           String   @unique  // ID from ExerciseDB API
+  name            String
+  gifUrl          String
+  bodyPart        String   // e.g., "chest", "back", "legs"
+  equipment       String   // e.g., "barbell", "dumbbell", "bodyweight"
+  target          String   // Target muscle group
+  secondaryMuscles String[] // Secondary muscles worked
+  instructions    String[] // Array of instruction steps
 
   // Relations
   savedBy          SavedExercise[]
