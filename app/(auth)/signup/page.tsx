@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { GoogleIcon } from "@/public/icons/GoogleIcon";
 
 const signupSchema = z
@@ -26,6 +27,8 @@ const signupSchema = z
 type SignupForm = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -47,7 +50,8 @@ export default function SignupPage() {
         throw new Error(error.message || "Signup failed");
       }
 
-      alert("Account created! You can now log in.");
+      // Redirect to login page after successful signup
+      router.push("/login?signup=success");
     } catch (error: any) {
       alert(error.message);
     }
