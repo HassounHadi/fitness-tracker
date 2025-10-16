@@ -62,8 +62,17 @@ export default function LoginPage() {
         });
       }
     } else {
-      toast.success("Welcome back!");
-      router.push("/dashboard");
+      // Get session to check onboarding status
+      const sessionRes = await fetch("/api/auth/session");
+      const session = await sessionRes.json();
+
+      if (session && !session.isOnboarded) {
+        toast.success("Welcome! Let's set up your profile");
+        router.push("/onboarding");
+      } else {
+        toast.success("Welcome back!");
+        router.push("/dashboard");
+      }
     }
   };
 

@@ -52,9 +52,30 @@ export const authOptions: NextAuthOptions = {
         const accessToken = generateAccessToken(safeUser);
         const refreshToken = generateRefreshToken(safeUser);
 
+        // Fetch user's onboarding status
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: {
+            fitnessGoal: true,
+            fitnessLevel: true,
+            height: true,
+            currentWeight: true,
+            targetWeight: true,
+          },
+        });
+
+        const isOnboarded = !!(
+          dbUser?.fitnessGoal &&
+          dbUser?.fitnessLevel &&
+          dbUser?.height &&
+          dbUser?.currentWeight &&
+          dbUser?.targetWeight
+        );
+
         token.accessToken = accessToken;
         token.refreshToken = refreshToken;
         token.accessTokenExpires = Date.now() + 15 * 60 * 1000; // 15 min
+        token.isOnboarded = isOnboarded;
       }
 
       // If token has error (user deleted), return null to force re-login
@@ -80,6 +101,7 @@ export const authOptions: NextAuthOptions = {
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
       session.accessTokenExpires = token.accessTokenExpires;
+      session.isOnboarded = token.isOnboarded;
       return session;
     },
   },
