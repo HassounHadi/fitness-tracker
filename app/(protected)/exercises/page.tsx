@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { ExerciseFilters } from "@/components/exercises/exercise-filters";
 import { ExerciseGrid } from "@/components/exercises/exercise-grid";
+import { ExerciseDetailModal } from "@/components/exercises/exercise-detail-modal";
 import { useExercises } from "@/hooks/use-exercises";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Loader2 } from "lucide-react";
@@ -15,6 +16,10 @@ export default function ExercisesPage() {
   );
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Debounce search query
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -41,8 +46,8 @@ export default function ExercisesPage() {
   };
 
   const handleViewDetails = (id: string) => {
-    console.log("View details:", id);
-    // TODO: Navigate to exercise details page
+    setSelectedExerciseId(id);
+    setIsModalOpen(true);
   };
 
   return (
@@ -88,6 +93,13 @@ export default function ExercisesPage() {
       {!isLoading && !error && (
         <ExerciseGrid exercises={exercises} onViewDetails={handleViewDetails} />
       )}
+
+      {/* Exercise Detail Modal */}
+      <ExerciseDetailModal
+        exerciseId={selectedExerciseId}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      />
     </div>
   );
 }
