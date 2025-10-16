@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { api } from "@/lib/api-client";
+import { useOnboarding } from "@/hooks/use-auth";
 
 // Step 1: Profile Information
 const profileSchema = z.object({
@@ -44,8 +43,8 @@ type GoalsForm = z.infer<typeof goalsSchema>;
 type EquipmentForm = z.infer<typeof equipmentSchema>;
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const [step, setStep] = useState(1);
+  const onboardingMutation = useOnboarding();
 
   // Form for Step 1
   const profileForm = useForm<ProfileForm>({
@@ -98,27 +97,23 @@ export default function OnboardingPage() {
     setStep(3);
   };
 
-  const onEquipmentSubmit = async (data: EquipmentForm) => {
+  const onEquipmentSubmit = (data: EquipmentForm) => {
     // Combine all data from all steps
     const completeData = {
-      ...profileForm.getValues(),
-      ...goalsForm.getValues(),
-      ...data,
+      name: profileForm.getValues().name,
       height: parseFloat(profileForm.getValues().height),
       currentWeight: parseFloat(profileForm.getValues().currentWeight),
       targetWeight: parseFloat(profileForm.getValues().targetWeight),
+      fitnessGoal: goalsForm.getValues().fitnessGoal,
+      fitnessLevel: goalsForm.getValues().fitnessLevel,
+      availableEquipment: data.availableEquipment,
       dailyCalorieGoal: parseInt(data.dailyCalorieGoal),
       proteinGoal: parseInt(data.proteinGoal),
       carbGoal: parseInt(data.carbGoal),
       fatGoal: parseInt(data.fatGoal),
     };
 
-    // Send to API endpoint
-    const response = await api.post("/api/user/onboarding", completeData);
-
-    if (response.success) {
-      router.push("/dashboard");
-    }
+    onboardingMutation.mutate(completeData);
   };
 
   const toggleEquipment = (equipment: string) => {
@@ -425,7 +420,7 @@ export default function OnboardingPage() {
                 <Button
                   type="submit"
                   className="flex-1"
-                  loading={equipmentForm.formState.isSubmitting}
+                  loading={onboardingMutation.isPending}
                   loadingText="Completing setup..."
                 >
                   Complete Setup
