@@ -18,8 +18,8 @@ export const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/exercises", label: "Exercises" },
     { href: "/workouts", label: "Workouts" },
+    { href: "/calendar", label: "Calendar" },
     { href: "/progress", label: "Progress" },
-    { href: "/nutrition", label: "Nutrition" },
   ];
 
   return (

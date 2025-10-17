@@ -24,7 +24,7 @@ export default async function ProtectedLayout({
   return (
     <WorkoutBuilderProvider>
       <Navbar />
-      <main className="pt-28 min-h-screen pb-10">
+      <main className="pt-28 min-h-screen pb-4">
         <div className="container mx-auto px-4 md:px-6 max-w-(--breakpoint-xl)">
           {children}
         </div>
