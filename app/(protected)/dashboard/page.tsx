@@ -1,19 +1,10 @@
 "use client";
-
-import { StatCard } from "@/components/dashboard/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/common/section-header";
-import {
-  Dumbbell,
-  Target,
-  Flame,
-  TrendingUp,
-  Calendar,
-  Apple,
-  Plus,
-} from "lucide-react";
+import { Calendar, Apple } from "lucide-react";
 import { CircularRings } from "@/components/ui/circular-rings";
+import { NutritionLogDialog } from "@/components/dashboard/nutrition-log-dialog";
 
 export default function DashboardPage() {
   const nutritionRings = [
@@ -92,9 +83,7 @@ export default function DashboardPage() {
                 goal: 2000,
               }}
             />
-            <Button variant="secondary" className="w-full mt-6">
-              Log Meal
-            </Button>
+            <NutritionLogDialog />
           </CardContent>
         </Card>
       </div>
