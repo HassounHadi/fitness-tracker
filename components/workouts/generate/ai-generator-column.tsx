@@ -23,6 +23,7 @@ interface AIGeneratorColumnProps {
   onTargetMusclesChange: (muscles: string[]) => void;
   onInstructionsChange: (value: string) => void;
   onGenerate: () => void;
+  loading?: boolean;
 }
 
 const MUSCLE_GROUPS = ["chest", "back", "shoulders", "arms", "legs", "core"];
@@ -37,6 +38,7 @@ export function AIGeneratorColumn({
   onTargetMusclesChange,
   onInstructionsChange,
   onGenerate,
+  loading = false,
 }: AIGeneratorColumnProps) {
   const toggleMuscle = (muscle: string) => {
     if (targetMuscles.includes(muscle)) {
@@ -125,15 +127,17 @@ export function AIGeneratorColumn({
           onClick={onGenerate}
           className="w-full gap-2"
           size="lg"
-          disabled={!goal || !duration || targetMuscles.length === 0}
+          disabled={loading || !goal || !duration || targetMuscles.length === 0}
         >
-          <Sparkles className="h-4 w-4" />
-          Generate with AI
+          <Sparkles className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+          {loading ? "Generating..." : "Generate with AI"}
         </Button>
 
         <div className="border-t pt-4 space-y-2">
           <p className="p3 text-accent text-center">
-            AI will analyze your profile and create a personalized workout
+            {loading
+              ? "AI is creating your personalized workout..."
+              : "AI will analyze your profile and create a personalized workout"}
           </p>
         </div>
       </CardContent>

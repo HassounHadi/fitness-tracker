@@ -156,14 +156,72 @@ export default function GenerateWorkoutPage() {
     });
   };
 
-  const handleGenerateAI = () => {
-    // TODO: Implement AI generation
-    console.log("Generate with AI:", {
-      goal: aiGoal,
-      duration: aiDuration,
-      targetMuscles: aiTargetMuscles,
-      instructions: aiInstructions,
-    });
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleGenerateAI = async () => {
+    setAiLoading(true);
+
+    try {
+      // Prepare minimal exercise data (only ID and name)
+      const exerciseReferences = exercisesData.map((ex) => ({
+        id: ex.id,
+        name: ex.name,
+      }));
+
+      const res = await fetch("/api/gemini/workout-generator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          goal: aiGoal,
+          duration: parseInt(aiDuration),
+          targetMuscles: aiTargetMuscles,
+          instructions: aiInstructions,
+          exercises: exerciseReferences,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Clear existing workout first
+      clearWorkout();
+
+      // Set AI-generated workout name and description
+      setWorkoutName(data.workoutName || "AI Generated Workout");
+      setWorkoutDescription(
+        data.workoutDescription || "Personalized workout created by AI"
+      );
+
+      // Add each exercise to the workout
+      data.exercises.forEach((aiExercise: any) => {
+        const fullExercise = exercisesData.find(
+          (ex) => ex.id === aiExercise.exerciseId
+        );
+        if (fullExercise) {
+          addExercise(fullExercise);
+          // Update the exercise with AI-recommended sets, reps, and rest
+          const exerciseId = `${fullExercise.id}-${Date.now()}`;
+          setTimeout(() => {
+            updateExercise(exerciseId, {
+              sets: aiExercise.sets || 3,
+              reps: aiExercise.reps || 10,
+              restTime: aiExercise.restTime || 60,
+              notes: aiExercise.notes,
+            });
+          }, 100);
+        }
+      });
+
+      console.log("✅ Workout generated successfully!");
+    } catch (err: any) {
+      console.error("❌ Error generating workout:", err);
+      alert(`Failed to generate workout: ${err.message}`);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   return (
@@ -291,6 +349,7 @@ export default function GenerateWorkoutPage() {
             onTargetMusclesChange={setAiTargetMuscles}
             onInstructionsChange={setAiInstructions}
             onGenerate={handleGenerateAI}
+            loading={aiLoading}
           />
         </div>
       </div>
