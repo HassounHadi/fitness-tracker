@@ -1,6 +1,8 @@
 "use client";
+import { useState } from "react";
 import { useWorkouts, type WorkoutWithExercises } from "@/hooks/use-workouts";
 import { WorkoutCard } from "@/components/workouts/workout-card";
+import { WorkoutDetailModal } from "@/components/workouts/workout-detail-modal";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
@@ -176,13 +178,18 @@ const MOCK_DATA: WorkoutWithExercises[] = [
 
 export default function WorkoutsPage() {
   const { data: workouts = [], isLoading, error } = useWorkouts();
+  const [selectedWorkout, setSelectedWorkout] = useState<WorkoutWithExercises | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Use mock data for preview (remove this line later)
   const displayWorkouts = workouts.length > 0 ? workouts : MOCK_DATA;
 
   const handleViewWorkout = (id: string) => {
-    console.log("View workout:", id);
-    // TODO: Open workout detail modal or navigate to workout detail page
+    const workout = displayWorkouts.find((w) => w.id === id);
+    if (workout) {
+      setSelectedWorkout(workout);
+      setModalOpen(true);
+    }
   };
 
   return (
@@ -249,6 +256,13 @@ export default function WorkoutsPage() {
           <p className="text-error">Failed to load workouts</p>
         </div>
       )}
+
+      {/* Workout Detail Modal */}
+      <WorkoutDetailModal
+        workout={selectedWorkout}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+      />
     </div>
   );
 }

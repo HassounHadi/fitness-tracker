@@ -17,9 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { X, Save, Dumbbell } from "lucide-react";
-import Image from "next/image";
+import { Save, Dumbbell } from "lucide-react";
+import { ExerciseFormItem } from "@/components/exercises/exercise-form-item";
 
 export function WorkoutBuilderSidebar() {
   const {
@@ -36,7 +35,6 @@ export function WorkoutBuilderSidebar() {
 
   const [workoutName, setWorkoutName] = useState("");
   const [workoutDescription, setWorkoutDescription] = useState("");
-  const [imageError, setImageError] = useState<Record<string, boolean>>({});
 
   const handleSaveWorkout = async () => {
     if (!workoutName.trim() || exercises.length === 0) return;
@@ -66,10 +64,6 @@ export function WorkoutBuilderSidebar() {
       console.error("Error saving workout:", error);
       // Error toast is handled by the mutation
     }
-  };
-
-  const handleImageError = (exerciseId: string) => {
-    setImageError((prev) => ({ ...prev, [exerciseId]: true }));
   };
 
   return (
@@ -137,146 +131,16 @@ export function WorkoutBuilderSidebar() {
                 </div>
 
                 {exercises.map((item) => (
-                  <div
+                  <ExerciseFormItem
                     key={item.exercise.id}
-                    className="border rounded-lg p-4 space-y-3"
-                  >
-                    {/* Exercise Header */}
-                    <div className="flex gap-3">
-                      <div className="relative w-16 h-16 rounded overflow-hidden bg-muted flex-shrink-0">
-                        {!imageError[item.exercise.id] ? (
-                          <Image
-                            src={item.exercise.gifUrl}
-                            alt={item.exercise.name}
-                            fill
-                            className="object-cover"
-                            onError={() => handleImageError(item.exercise.id)}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Dumbbell className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="t6 capitalize line-clamp-2">
-                            {item.exercise.name}
-                          </h4>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 flex-shrink-0"
-                            onClick={() => removeExercise(item.exercise.id)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          <Badge
-                            variant="secondary"
-                            className="text-xs capitalize"
-                          >
-                            {item.exercise.bodyPart}
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className="text-xs capitalize"
-                          >
-                            {item.exercise.target}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Exercise Parameters */}
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor={`sets-${item.exercise.id}`}
-                          className="text-xs"
-                        >
-                          Sets
-                        </Label>
-                        <Input
-                          id={`sets-${item.exercise.id}`}
-                          type="number"
-                          min="1"
-                          value={item.sets}
-                          onChange={(e) =>
-                            updateExercise(item.exercise.id, {
-                              sets: parseInt(e.target.value) || 1,
-                            })
-                          }
-                          className="h-9"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor={`reps-${item.exercise.id}`}
-                          className="text-xs"
-                        >
-                          Reps
-                        </Label>
-                        <Input
-                          id={`reps-${item.exercise.id}`}
-                          type="number"
-                          min="1"
-                          value={item.reps}
-                          onChange={(e) =>
-                            updateExercise(item.exercise.id, {
-                              reps: parseInt(e.target.value) || 1,
-                            })
-                          }
-                          className="h-9"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label
-                          htmlFor={`rest-${item.exercise.id}`}
-                          className="text-xs"
-                        >
-                          Rest (s)
-                        </Label>
-                        <Input
-                          id={`rest-${item.exercise.id}`}
-                          type="number"
-                          min="0"
-                          step="15"
-                          value={item.restTime}
-                          onChange={(e) =>
-                            updateExercise(item.exercise.id, {
-                              restTime: parseInt(e.target.value) || 0,
-                            })
-                          }
-                          className="h-9"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Notes */}
-                    <div className="space-y-1">
-                      <Label
-                        htmlFor={`notes-${item.exercise.id}`}
-                        className="text-xs"
-                      >
-                        Notes (optional)
-                      </Label>
-                      <Textarea
-                        id={`notes-${item.exercise.id}`}
-                        placeholder="Add notes for this exercise..."
-                        value={item.notes || ""}
-                        onChange={(e) =>
-                          updateExercise(item.exercise.id, {
-                            notes: e.target.value,
-                          })
-                        }
-                        rows={2}
-                        className="resize-none text-sm"
-                      />
-                    </div>
-                  </div>
+                    data={item}
+                    mode="edit"
+                    onUpdate={(updates) =>
+                      updateExercise(item.exercise.id, updates)
+                    }
+                    onRemove={() => removeExercise(item.exercise.id)}
+                    showImage={true}
+                  />
                 ))}
               </div>
             </ScrollArea>
