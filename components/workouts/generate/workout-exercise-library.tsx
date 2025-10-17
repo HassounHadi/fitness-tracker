@@ -25,7 +25,9 @@ interface WorkoutExerciseLibraryProps {
   onDragStart: (e: React.DragEvent, exercise: Exercise) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
+  onExerciseClick?: (exercise: Exercise) => void;
   disabled?: boolean;
+  isMobile?: boolean;
 }
 
 export function WorkoutExerciseLibrary({
@@ -46,13 +48,15 @@ export function WorkoutExerciseLibrary({
   onDragStart,
   onDragOver,
   onDrop,
+  onExerciseClick,
   disabled = false,
+  isMobile = false,
 }: WorkoutExerciseLibraryProps) {
   return (
     <Card
       className="flex flex-col h-full relative"
-      onDragOver={disabled ? undefined : onDragOver}
-      onDrop={disabled ? undefined : onDrop}
+      onDragOver={disabled || isMobile ? undefined : onDragOver}
+      onDrop={disabled || isMobile ? undefined : onDrop}
     >
       {disabled && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
@@ -92,14 +96,23 @@ export function WorkoutExerciseLibrary({
           {!isLoading && !error && exercises.length > 0 && (
             <>
               <p className="p3 text-accent sticky top-0 bg-card py-2 z-10">
-                Drag exercises to your workout or drag from workout to remove
+                {isMobile
+                  ? "Tap exercises to add them to your workout"
+                  : "Drag exercises to your workout or drag from workout to remove"}
               </p>
               {exercises.slice(0, 50).map((exercise) => (
                 <div
                   key={exercise.id}
-                  draggable={!disabled}
-                  onDragStart={disabled ? undefined : (e) => onDragStart(e, exercise)}
-                  className={disabled ? "cursor-not-allowed opacity-50" : "cursor-move"}
+                  draggable={!disabled && !isMobile}
+                  onDragStart={disabled || isMobile ? undefined : (e) => onDragStart(e, exercise)}
+                  onClick={isMobile && !disabled ? () => onExerciseClick?.(exercise) : undefined}
+                  className={
+                    disabled
+                      ? "cursor-not-allowed opacity-50"
+                      : isMobile
+                      ? "cursor-pointer hover:scale-[1.02] transition-transform active:scale-[0.98]"
+                      : "cursor-move"
+                  }
                 >
                   <DraggableExerciseCard exercise={exercise} />
                 </div>
@@ -110,15 +123,17 @@ export function WorkoutExerciseLibrary({
           {!isLoading && exercises.length === 0 && (
             <div
               className="text-center py-12 min-h-[300px] border-2 border-dashed border-primary/30 rounded-lg flex items-center justify-center bg-primary/5 transition-colors hover:border-primary/50 hover:bg-primary/10"
-              onDragOver={onDragOver}
-              onDrop={onDrop}
+              onDragOver={isMobile ? undefined : onDragOver}
+              onDrop={isMobile ? undefined : onDrop}
             >
               <div>
                 <Dumbbell className="h-12 w-12 text-primary/50 mx-auto mb-3" />
                 <p className="p2 text-accent mb-1">No exercises found</p>
-                <p className="p3 text-muted-foreground">
-                  Drag exercises here to remove from workout
-                </p>
+                {!isMobile && (
+                  <p className="p3 text-muted-foreground">
+                    Drag exercises here to remove from workout
+                  </p>
+                )}
               </div>
             </div>
           )}

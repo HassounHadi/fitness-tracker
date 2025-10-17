@@ -282,16 +282,51 @@ export default function GenerateWorkoutPage() {
 
           <TabsContent
             value="exercises"
-            className="mt-4 space-y-4 flex-1 overflow-y-auto"
+            className="mt-4 space-y-4 flex-1 overflow-hidden flex flex-col"
           >
-            {/* Mobile version - simplified for touch */}
-            <p className="p3 text-accent">
-              Tap exercises to add them to your workout
-            </p>
+            <WorkoutExerciseLibrary
+              exercises={exercises}
+              isLoading={isLoading}
+              error={error}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              selectedBodyPart={selectedBodyPart}
+              onBodyPartChange={setSelectedBodyPart}
+              selectedEquipment={selectedEquipment}
+              onEquipmentChange={setSelectedEquipment}
+              selectedTarget={selectedTarget}
+              onTargetChange={setSelectedTarget}
+              showFilters={showFilters}
+              onToggleFilters={() => setShowFilters(!showFilters)}
+              onClearFilters={clearFilters}
+              onDragStart={handleLibraryDragStart}
+              onDragOver={handleLibraryDragOver}
+              onDrop={handleLibraryDrop}
+              onExerciseClick={(exercise) => addExercise(exercise)}
+              disabled={isGenerating}
+              isMobile={true}
+            />
           </TabsContent>
 
-          <TabsContent value="workout" className="mt-4 flex-1 overflow-y-auto">
-            {/* Mobile workout view */}
+          <TabsContent value="workout" className="mt-4 flex-1 overflow-hidden flex flex-col">
+            <WorkoutBuilderColumn
+              workoutName={workoutName}
+              workoutDescription={workoutDescription}
+              workoutExercises={workoutExercises}
+              draggedWorkoutIndex={draggedWorkoutIndex}
+              isSaving={createWorkoutMutation.isPending}
+              disabled={isGenerating}
+              onNameChange={setWorkoutName}
+              onDescriptionChange={setWorkoutDescription}
+              onUpdateExercise={updateExercise}
+              onRemoveExercise={removeExercise}
+              onDragStart={handleWorkoutDragStart}
+              onDragOver={handleWorkoutDragOver}
+              onDrop={handleWorkoutDrop}
+              onDragEnd={handleWorkoutDragEnd}
+              onClearWorkout={clearWorkout}
+              onSaveWorkout={handleSaveWorkout}
+            />
           </TabsContent>
 
           <TabsContent value="ai" className="mt-4 flex-1 overflow-y-auto">
@@ -305,6 +340,7 @@ export default function GenerateWorkoutPage() {
               onTargetMusclesChange={setAiTargetMuscles}
               onInstructionsChange={setAiInstructions}
               onGenerate={handleGenerateAI}
+              loading={isGenerating}
             />
           </TabsContent>
         </Tabs>
