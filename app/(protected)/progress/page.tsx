@@ -1,4 +1,4 @@
-import { StatCard } from "@/components/dashboard/stat-card";
+import { StatCard } from "@/components/progress/stat-card";
 import { ProgressLogDialog } from "@/components/progress/progress-log-dialog";
 import { Dumbbell, Flame, Target } from "lucide-react";
 
