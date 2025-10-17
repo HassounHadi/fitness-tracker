@@ -19,6 +19,8 @@ const buttonVariants = cva(
           "border border-accent bg-background text-accent hover:bg-accent/10 rounded-full",
         ghost:
           "hover:bg-accent text-accent hover:text-background dark:hover:bg-accent/50 rounded-full",
+        error:
+          "text-error hover:bg-error/10 hover:text-error dark:hover:bg-error/20 rounded-full",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

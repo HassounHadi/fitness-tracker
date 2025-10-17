@@ -108,10 +108,10 @@ export function WorkoutBuilderExercise({
 
           {/* Remove Button */}
           <Button
-            variant="ghost"
+            variant="error"
             size="icon"
             onClick={onRemove}
-            className="h-8 w-8 text-error hover:text-error"
+            className="h-8 w-8"
           >
             <X className="h-4 w-4" />
           </Button>

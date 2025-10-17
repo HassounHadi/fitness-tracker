@@ -100,10 +100,10 @@ export function WorkoutBuilderColumn({
           <Label>Exercises ({workoutExercises.length})</Label>
           {workoutExercises.length > 0 && (
             <Button
-              variant="ghost"
+              variant="error"
               size="sm"
               onClick={onClearWorkout}
-              className="h-8 text-error"
+              className="h-8"
               disabled={disabled}
             >
               <Trash2 className="h-4 w-4 mr-1" />
