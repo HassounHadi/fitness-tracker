@@ -46,7 +46,7 @@ const features = [
 
 export default function KeyFeatures() {
   return (
-    <section className="py-20 px-6 md:px-16 bg-white">
+    <section className="py-20 px-6 md:px-16 bg-white max-w-(--breakpoint-xl) mx-auto">
       <div className="grid grid-cols-1 gap-8 md:gap-16">
         {features.map((feature, idx) => (
           <div
