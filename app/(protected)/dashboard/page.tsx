@@ -17,13 +17,12 @@ export default function DashboardPage() {
 
   // Fetch today's scheduled workout
   const today = new Date();
-  const { data: scheduledWorkouts = [], isLoading: workoutLoading } = useScheduledWorkouts(
-    startOfDay(today),
-    endOfDay(today)
-  );
+  const { data: scheduledWorkouts = [], isLoading: workoutLoading } =
+    useScheduledWorkouts(startOfDay(today), endOfDay(today));
 
   // Fetch today's nutrition
-  const { data: nutritionData, isLoading: nutritionLoading } = useTodaysNutrition();
+  const { data: nutritionData, isLoading: nutritionLoading } =
+    useTodaysNutrition();
 
   const todaysWorkout = useMemo(() => {
     if (scheduledWorkouts.length === 0) return null;
@@ -32,18 +31,30 @@ export default function DashboardPage() {
       id: workout.id,
       name: workout.template.name,
       exerciseCount: workout.template.exercises.length,
-      duration: workout.template.exercises.reduce((acc, ex) => {
-        return acc + (ex.sets * ex.reps * 3 + ex.sets * ex.restTime) / 60;
-      }, 0),
+      duration: workout.template.exercises.reduce(
+        (acc: number, ex: { sets: number; reps: number; restTime: number }) => {
+          return acc + (ex.sets * ex.reps * 3 + ex.sets * ex.restTime) / 60;
+        },
+        0
+      ),
       completed: workout.completed,
     };
   }, [scheduledWorkouts]);
 
   // Get user goals from profile
-  const calorieGoal = session?.user?.dailyCalorieGoal || 2000;
-  const proteinGoal = session?.user?.proteinGoal || 150;
-  const carbGoal = session?.user?.carbGoal || 200;
-  const fatGoal = session?.user?.fatGoal || 60;
+  const userWithGoals = session?.user as
+    | {
+        dailyCalorieGoal?: number;
+        proteinGoal?: number;
+        carbGoal?: number;
+        fatGoal?: number;
+      }
+    | undefined;
+
+  const calorieGoal = userWithGoals?.dailyCalorieGoal ?? 2000;
+  const proteinGoal = userWithGoals?.proteinGoal ?? 150;
+  const carbGoal = userWithGoals?.carbGoal ?? 200;
+  const fatGoal = userWithGoals?.fatGoal ?? 60;
 
   // Build nutrition rings with real data
   const nutritionRings = useMemo(() => {
@@ -95,7 +106,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
-              Today's Workout
+              Today&apos;s Workout
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -109,7 +120,8 @@ export default function DashboardPage() {
                   <div className="flex-1">
                     <h4 className="t4">{todaysWorkout.name}</h4>
                     <p className="p2 text-muted-foreground mt-1">
-                      {todaysWorkout.exerciseCount} exercises • {Math.round(todaysWorkout.duration)} min
+                      {todaysWorkout.exerciseCount} exercises •{" "}
+                      {Math.round(todaysWorkout.duration)} min
                     </p>
                   </div>
                   {todaysWorkout.completed ? (
@@ -117,7 +129,9 @@ export default function DashboardPage() {
                       Completed ✓
                     </Button>
                   ) : (
-                    <Link href={`/active-workout?scheduledWorkoutId=${todaysWorkout.id}`}>
+                    <Link
+                      href={`/active-workout?scheduledWorkoutId=${todaysWorkout.id}`}
+                    >
                       <Button size="sm">Start</Button>
                     </Link>
                   )}
@@ -126,7 +140,9 @@ export default function DashboardPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <Dumbbell className="h-12 w-12 text-muted-foreground/30 mb-3" />
-                <p className="text-muted-foreground mb-3">No workout scheduled for today</p>
+                <p className="text-muted-foreground mb-3">
+                  No workout scheduled for today
+                </p>
                 <Link href="/calendar">
                   <Button size="sm" variant="secondary">
                     Schedule Workout
@@ -142,7 +158,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Apple className="h-5 w-5 text-accent" />
-              Today's Nutrition
+              Today&apos;s Nutrition
             </CardTitle>
           </CardHeader>
           <CardContent>

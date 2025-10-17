@@ -98,7 +98,6 @@ export default function OnboardingPage() {
   };
 
   const onEquipmentSubmit = (data: EquipmentForm) => {
-    // Combine all data from all steps
     const completeData = {
       name: profileForm.getValues().name,
       height: parseFloat(profileForm.getValues().height),
@@ -128,7 +127,9 @@ export default function OnboardingPage() {
     <Card className="w-full max-w-2xl shadow-lg rounded-2xl border border-border/40">
       <CardHeader className="text-center space-y-4">
         <CardTitle className="t3 text-primary">Complete Your Profile</CardTitle>
-        <p className="p1 text-accent">Let's personalize your fitness journey</p>
+        <p className="p1 text-accent">
+          Let&apos;s personalize your fitness journey
+        </p>
 
         {/* Visual Step Indicator */}
         <div className="flex gap-2 pt-2">
