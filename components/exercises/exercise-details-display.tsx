@@ -1,9 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
-import { useState } from "react";
-import { Dumbbell } from "lucide-react";
+import { ImageWithFallback } from "@/components/common/image-with-fallback";
 import type { Exercise } from "@prisma/client";
 
 interface ExerciseDetailsDisplayProps {
@@ -17,28 +15,18 @@ export function ExerciseDetailsDisplay({
   showImage = true,
   imageClassName = "h-[40vh] md:h-auto",
 }: ExerciseDetailsDisplayProps) {
-  const [imageError, setImageError] = useState(false);
-
   return (
     <>
       {/* Image Section */}
       {showImage && (
-        <div className={`relative w-full bg-muted ${imageClassName}`}>
-          {!imageError ? (
-            <Image
-              src={exercise.gifUrl}
-              alt={exercise.name}
-              fill
-              className="object-contain p-4"
-              onError={() => setImageError(true)}
-              unoptimized
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <Dumbbell className="h-12 w-12 text-muted-foreground" />
-            </div>
-          )}
-        </div>
+        <ImageWithFallback
+          src={exercise.gifUrl}
+          alt={exercise.name}
+          containerClassName={imageClassName}
+          imageClassName="p-4"
+          objectFit="contain"
+          unoptimized
+        />
       )}
 
       {/* Details Section */}

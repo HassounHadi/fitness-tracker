@@ -19,6 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Save, Dumbbell } from "lucide-react";
 import { ExerciseFormItem } from "@/components/exercises/exercise-form-item";
+import { EmptyState } from "@/components/common/empty-state";
 
 export function WorkoutBuilderSidebar() {
   const {
@@ -79,13 +80,12 @@ export function WorkoutBuilderSidebar() {
         <Separator />
 
         {exercises.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 px-6 py-12 text-center">
-            <Dumbbell className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="t5 font-semibold mb-2">No exercises added yet</p>
-            <p className="p3 text-muted-foreground">
-              Browse exercises and click "Add" to build your workout
-            </p>
-          </div>
+          <EmptyState
+            icon={Dumbbell}
+            variant="with-icon"
+            title="No exercises added yet"
+            description="Browse exercises and click 'Add' to build your workout"
+          />
         ) : (
           <>
             {/* Workout Details Form */}

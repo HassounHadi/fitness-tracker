@@ -4,9 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Info, Plus, Check } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
 import { useWorkoutBuilder } from "@/contexts/workout-builder-context";
+import { ImageWithFallback } from "@/components/common/image-with-fallback";
 import type { Exercise } from "@prisma/client";
 
 export interface ExerciseCardProps {
@@ -18,7 +17,6 @@ export function ExerciseCard({
   exercise,
   onViewDetails,
 }: ExerciseCardProps) {
-  const [imageError, setImageError] = useState(false);
   const { exercises, addExercise } = useWorkoutBuilder();
 
   const isInWorkout = exercises.some((item) => item.exercise.id === exercise.id);
@@ -35,21 +33,13 @@ export function ExerciseCard({
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50 py-0">
       <CardContent className="p-0">
         {/* GIF Container */}
-        <div className="relative aspect-square bg-muted overflow-hidden">
-          {!imageError ? (
-            <Image
-              src={exercise.gifUrl}
-              alt={exercise.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-muted">
-              <p className="text-muted-foreground p3">Image unavailable</p>
-            </div>
-          )}
-        </div>
+        <ImageWithFallback
+          src={exercise.gifUrl}
+          alt={exercise.name}
+          containerClassName="aspect-square overflow-hidden"
+          imageClassName="group-hover:scale-105 transition-transform duration-300"
+          fallbackText="Image unavailable"
+        />
 
         {/* Exercise Info */}
         <div className="p-4 space-y-3">

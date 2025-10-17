@@ -7,8 +7,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useExercise } from "@/hooks/use-exercises";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/common/loading-state";
 import { ExerciseDetailsDisplay } from "./exercise-details-display";
 
 interface ExerciseDetailModalProps {
@@ -28,9 +29,7 @@ export function ExerciseDetailModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className=" !max-w-screen sm:!max-w-[80vw] !h-screen sm:max-h-[90vh] p-0 gap-0 overflow-hidden">
         {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="animate-spin size-10 text-primary" />
-          </div>
+          <LoadingState size="lg" />
         ) : exercise ? (
           <div className="flex flex-col md:flex-row h-full overflow-hidden">
             {/* Left Side - Image (Full screen on mobile, side-by-side on desktop) */}

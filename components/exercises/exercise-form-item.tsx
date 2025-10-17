@@ -5,9 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Dumbbell } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
+import { X } from "lucide-react";
+import { ImageWithFallback } from "@/components/common/image-with-fallback";
 import type { Exercise } from "@prisma/client";
 
 export interface ExerciseFormData {
@@ -35,33 +34,18 @@ export function ExerciseFormItem({
   showImage = true,
   compact = false,
 }: ExerciseFormItemProps) {
-  const [imageError, setImageError] = useState(false);
   const { exercise, sets, reps, restTime, notes } = data;
-
-  const handleImageError = () => {
-    setImageError(true);
-  };
 
   return (
     <div className="border rounded-lg p-4 space-y-3">
       {/* Exercise Header */}
       <div className="flex gap-3">
         {showImage && (
-          <div className="relative w-16 h-16 rounded overflow-hidden bg-muted flex-shrink-0">
-            {!imageError ? (
-              <Image
-                src={exercise.gifUrl}
-                alt={exercise.name}
-                fill
-                className="object-cover"
-                onError={handleImageError}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Dumbbell className="h-6 w-6 text-muted-foreground" />
-              </div>
-            )}
-          </div>
+          <ImageWithFallback
+            src={exercise.gifUrl}
+            alt={exercise.name}
+            containerClassName="w-16 h-16 rounded overflow-hidden flex-shrink-0"
+          />
         )}
 
         <div className="flex-1 min-w-0">

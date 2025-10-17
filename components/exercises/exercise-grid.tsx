@@ -1,6 +1,7 @@
 "use client";
 
 import { ExerciseCard } from "./exercise-card";
+import { EmptyState } from "@/components/common/empty-state";
 import type { Exercise } from "@prisma/client";
 
 export interface ExerciseGridProps {
@@ -11,11 +12,11 @@ export interface ExerciseGridProps {
 export function ExerciseGrid({ exercises, onViewDetails }: ExerciseGridProps) {
   if (exercises.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="p1 text-muted-foreground">
-          No exercises found. Try adjusting your filters.
-        </p>
-      </div>
+      <EmptyState
+        variant="simple"
+        title="No exercises found"
+        description="Try adjusting your filters."
+      />
     );
   }
 
