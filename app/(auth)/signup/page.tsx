@@ -46,88 +46,84 @@ export default function SignupPage() {
   };
 
   return (
-    <section className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/40 via-background to-secondary/50 px-6 w-full">
-      <Card className="w-full max-w-lg shadow-lg rounded-2xl border border-border/40">
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="t3 text-primary">Create your account</CardTitle>
-          <p className="p1 text-accent">Sign up to get started with FitTrack</p>
-        </CardHeader>
+    <Card className="w-full max-w-lg shadow-lg rounded-2xl border border-border/40">
+      <CardHeader className="text-center space-y-2">
+        <CardTitle className="t3 text-primary">Create your account</CardTitle>
+        <p className="p1 text-accent">Sign up to get started with FitTrack</p>
+      </CardHeader>
 
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Email */}
-            <div className="space-y-1">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register("email")}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
-            </div>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Email */}
+          <div className="space-y-1">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email.message}</p>
+            )}
+          </div>
 
-            {/* Password */}
-            <div className="space-y-1">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register("password")}
-              />
-              {errors.password && (
-                <p className="text-sm text-red-500">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+          {/* Password */}
+          <div className="space-y-1">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password.message}</p>
+            )}
+          </div>
 
-            {/* Confirm Password */}
-            <div className="space-y-1">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                {...register("confirmPassword")}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
+          {/* Confirm Password */}
+          <div className="space-y-1">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              {...register("confirmPassword")}
+            />
+            {errors.confirmPassword && (
+              <p className="text-sm text-red-500">
+                {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
 
-            {/* Submit */}
-            <Button
-              type="submit"
-              className="w-full"
-              loading={signupMutation.isPending}
-              loadingText="Signing up..."
-            >
-              Sign Up
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full mt-2 text-foreground border border-border hover:scale-100 hover:bg-accent/5 hover:text-accent hover:border-accent"
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            >
-              <GoogleIcon className="w-5 h-5 mr-3" />
-              Sign up with Google
-            </Button>
+          {/* Submit */}
+          <Button
+            type="submit"
+            className="w-full"
+            loading={signupMutation.isPending}
+            loadingText="Signing up..."
+          >
+            Sign Up
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full mt-2 text-foreground border border-border hover:scale-100 hover:bg-accent/5 hover:text-accent hover:border-accent"
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          >
+            <GoogleIcon className="w-5 h-5 mr-3" />
+            Sign up with Google
+          </Button>
 
-            <p className="text-center text-sm text-muted-foreground pt-2">
-              Already have an account?{" "}
-              <Link href="/login" className="p2 text-primary underline">
-                Log in
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
-    </section>
+          <p className="text-center text-sm text-muted-foreground pt-2">
+            Already have an account?{" "}
+            <Link href="/login" className="p2 text-primary underline">
+              Log in
+            </Link>
+          </p>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
