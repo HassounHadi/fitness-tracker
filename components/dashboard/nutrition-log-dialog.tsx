@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+
 import {
   Dialog,
   DialogContent,
@@ -31,15 +33,35 @@ export function NutritionLogDialog() {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<NutritionFormValues>({
     resolver: zodResolver(nutritionSchema),
   });
 
+  const mutation = useMutation({
+    mutationFn: async (logText: string) => {
+      const res = await fetch("/api/nutrition-log", {
+        // updated route
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: logText }),
+      });
+      if (!res.ok) throw new Error("Failed to fetch nutrition data");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      console.log("Nutrition totals:", data.totals);
+      console.log("Detailed foods:", data.foods);
+      reset();
+      setOpen(false);
+    },
+    onError: (error) => {
+      console.error("Nutrition fetch error:", error);
+    },
+  });
+
   const onSubmit = (data: NutritionFormValues) => {
-    console.log("Nutrition log submitted:", data);
-    setOpen(false);
-    reset();
+    mutation.mutate(data.log);
   };
 
   return (
@@ -73,8 +95,8 @@ export function NutritionLogDialog() {
           </div>
 
           <div className="flex justify-end pt-2">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save"}
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>
