@@ -131,7 +131,7 @@ export default function OnboardingPage() {
           <CardTitle className="t3 text-primary">
             Complete Your Profile
           </CardTitle>
-          <p className="p1 text-muted-foreground">
+          <p className="p1 text-accent">
             Let's personalize your fitness journey
           </p>
 

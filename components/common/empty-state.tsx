@@ -70,7 +70,7 @@ export function EmptyState({
     return (
       <div className={cn("text-center py-12", className)}>
         <h3 className="t5 font-semibold text-primary mb-2">{title}</h3>
-        <p className="p1 text-muted-foreground">{description}</p>
+        <p className="p1 text-accent">{description}</p>
         {action && <div className="mt-4">{renderAction()}</div>}
       </div>
     );

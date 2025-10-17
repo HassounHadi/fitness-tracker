@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { ExerciseFilters } from "@/components/exercises/exercise-filters";
 import { ExerciseGrid } from "@/components/exercises/exercise-grid";
 import { ExerciseDetailModal } from "@/components/exercises/exercise-detail-modal";
+import { SectionHeader } from "@/components/common/section-header";
 import { useExercises } from "@/hooks/use-exercises";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Loader2 } from "lucide-react";
@@ -53,12 +54,11 @@ export default function ExercisesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="t1">Exercise Library</h1>
-        <p className="p1 text-muted-foreground mt-2">
-          Browse and discover exercises for your workouts
-        </p>
-      </div>
+      <SectionHeader
+        title="Exercise Library"
+        description="Browse and discover exercises for your workouts"
+        titleSize="t1"
+      />
 
       {/* Filters */}
       <ExerciseFilters

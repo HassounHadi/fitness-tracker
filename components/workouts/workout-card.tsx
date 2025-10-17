@@ -21,14 +21,14 @@ export function WorkoutCard({ workout, onView }: WorkoutCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <CardTitle className="t4 capitalize flex items-center gap-2">
+            <CardTitle className="t4 capitalize flex items-center gap-2 text-primary">
               {workout.isAiGenerated && (
                 <Zap className="h-4 w-4 text-accent fill-accent" />
               )}
               {workout.name}
             </CardTitle>
             {workout.description && (
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-accent mt-1">
                 {workout.description}
               </p>
             )}

@@ -45,11 +45,11 @@ export function WorkoutDetailModal({
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header */}
           <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
-            <DialogTitle className="t3 capitalize pr-8">
+            <DialogTitle className="t3 capitalize pr-8 text-primary">
               {workout.name}
             </DialogTitle>
             {workout.description && (
-              <p className="p2 text-muted-foreground mt-2">
+              <p className="p2 text-accent mt-2">
                 {workout.description}
               </p>
             )}
@@ -103,7 +103,7 @@ export function WorkoutDetailModal({
             {/* Desktop Left Side - Exercise List */}
             <div className="hidden md:flex w-full md:w-2/5 border-r flex-col overflow-hidden">
               <div className="px-4 py-3 border-b flex-shrink-0">
-                <h3 className="t5 font-semibold">
+                <h3 className="t5 font-semibold text-primary">
                   Exercises ({workout.exercises.length})
                 </h3>
               </div>
@@ -162,7 +162,7 @@ export function WorkoutDetailModal({
 
                 {/* Exercise Details */}
                 <div className="border-t pt-6">
-                  <h3 className="t4 font-semibold mb-4 capitalize">
+                  <h3 className="t4 font-semibold mb-4 capitalize text-primary">
                     {activeExercise.exercise.name}
                   </h3>
                   <ExerciseDetailsDisplay

@@ -34,21 +34,21 @@ export function ExerciseDetailsDisplay({
         {/* Exercise Info */}
         <div className="grid grid-cols-1 gap-4">
           <div>
-            <h4 className="t5 font-semibold mb-2">Body Part</h4>
+            <h4 className="t5 font-semibold mb-2 text-primary">Body Part</h4>
             <Badge variant="default" className="capitalize">
               {exercise.bodyPart}
             </Badge>
           </div>
 
           <div>
-            <h4 className="t5 font-semibold mb-2">Equipment</h4>
+            <h4 className="t5 font-semibold mb-2 text-primary">Equipment</h4>
             <Badge variant="secondary" className="capitalize">
               {exercise.equipment}
             </Badge>
           </div>
 
           <div>
-            <h4 className="t5 font-semibold mb-2">Target Muscle</h4>
+            <h4 className="t5 font-semibold mb-2 text-primary">Target Muscle</h4>
             <Badge variant="outline" className="capitalize">
               {exercise.target}
             </Badge>
@@ -58,7 +58,7 @@ export function ExerciseDetailsDisplay({
         {/* Secondary Muscles */}
         {exercise.secondaryMuscles.length > 0 && (
           <div>
-            <h4 className="t5 font-semibold mb-2">Secondary Muscles</h4>
+            <h4 className="t5 font-semibold mb-2 text-primary">Secondary Muscles</h4>
             <div className="flex flex-wrap gap-2">
               {exercise.secondaryMuscles.map((muscle) => (
                 <Badge key={muscle} variant="outline" className="capitalize">
@@ -72,10 +72,10 @@ export function ExerciseDetailsDisplay({
         {/* Instructions */}
         {exercise.instructions.length > 0 && (
           <div>
-            <h4 className="t5 font-semibold mb-3">Instructions</h4>
+            <h4 className="t5 font-semibold mb-3 text-primary">Instructions</h4>
             <ol className="space-y-3 list-decimal list-inside">
               {exercise.instructions.map((instruction, index) => (
-                <li key={index} className="p2 text-muted-foreground capitalize">
+                <li key={index} className="p2 text-accent capitalize">
                   {instruction}
                 </li>
               ))}

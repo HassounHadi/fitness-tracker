@@ -3,6 +3,7 @@
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SectionHeader } from "@/components/common/section-header";
 import {
   Dumbbell,
   Target,
@@ -43,12 +44,11 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="t1">Welcome back!</h1>
-          <p className="p1 text-muted-foreground mt-2">
-            Here's your fitness overview for today
-          </p>
-        </div>
+        <SectionHeader
+          title="Welcome back!"
+          description="Here's your fitness overview for today"
+          titleSize="t1"
+        />
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
           Quick Log Workout
