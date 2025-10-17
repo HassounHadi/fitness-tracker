@@ -175,9 +175,11 @@ model ScheduledWorkout {
   templateId  String
   scheduledDate DateTime  // The date this workout is scheduled for
   completed   Boolean  @default(false)
+  workoutLogId String?  @unique // Link to the workout log when started
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   template    WorkoutTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  workoutLog  WorkoutLog? @relation(fields: [workoutLogId], references: [id], onDelete: SetNull)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -202,6 +204,7 @@ model WorkoutLog {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   template    WorkoutTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
   exercises   LoggedExercise[]
+  scheduledWorkout ScheduledWorkout?
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

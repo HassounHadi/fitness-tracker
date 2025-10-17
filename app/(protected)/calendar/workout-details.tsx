@@ -20,6 +20,7 @@ interface Workout {
   exercises: Exercise[];
   completed: boolean;
   isAiGenerated?: boolean;
+  scheduledWorkoutId?: string; // Add scheduled workout ID
 }
 
 interface WorkoutDetailsProps {
@@ -71,7 +72,7 @@ export function WorkoutDetails({ workout, selectedDay, onAddWorkout }: WorkoutDe
                     <Check className="h-5 w-5 text-success" />
                   ) : (
                     <Link
-                      href="/active-workout"
+                      href={`/active-workout?scheduledWorkoutId=${workout.scheduledWorkoutId}`}
                       className="text-warning font-medium underline text-sm"
                     >
                       Start Workout

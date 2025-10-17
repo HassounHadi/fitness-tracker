@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -13,113 +14,188 @@ import { ExerciseFormItem } from "@/components/exercises/exercise-form-item";
 import { ExerciseDetailsDisplay } from "@/components/exercises/exercise-details-display";
 import { SectionHeader } from "@/components/common/section-header";
 import Link from "next/link";
-
-// -------------------- Mock Workout --------------------
-const mockWorkout = {
-  id: "mock-workout-1",
-  name: "Full Body Strength",
-  description: "A beginner-friendly full body workout",
-  exercises: [
-    {
-      exercise: {
-        id: "ex-1",
-        name: "Alternate Heel Touchers",
-        gifUrl: "",
-        bodyPart: "abs",
-        equipment: "bodyweight",
-        target: "obliques",
-        secondaryMuscles: [],
-        instructions: ["Lie on your back", "Alternate heel touches"],
-      },
-      sets: 3,
-      reps: 10,
-      restTime: 30,
-      notes: "Focus on form",
-    },
-    {
-      exercise: {
-        id: "ex-2",
-        name: "Push Ups",
-        gifUrl: "",
-        bodyPart: "chest",
-        equipment: "bodyweight",
-        target: "pectorals",
-        secondaryMuscles: ["triceps"],
-        instructions: [
-          "Keep your back straight",
-          "Lower until chest touches floor",
-        ],
-      },
-      sets: 3,
-      reps: 12,
-      restTime: 60,
-      notes: "",
-    },
-  ],
-};
+import {
+  useStartWorkout,
+  useUpdateSet,
+  useCompleteWorkout,
+  type WorkoutLog,
+  type LoggedExercise,
+} from "@/hooks/use-workout-log";
+import { Loader2 } from "lucide-react";
 
 // -------------------- Active Workout Page --------------------
 export default function ActiveWorkoutPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const scheduledWorkoutId = searchParams.get("scheduledWorkoutId");
+
+  const [workoutLog, setWorkoutLog] = useState<WorkoutLog | null>(null);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
-  const [currentSet, setCurrentSet] = useState(1);
+  const [currentSetIndex, setCurrentSetIndex] = useState(0);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
-  const [logs, setLogs] = useState<
-    { exerciseId: string; setNumber: number; repsDone: number }[]
-  >([]);
+  const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
 
-  const currentExercise = mockWorkout.exercises[currentExerciseIndex];
+  const startWorkoutMutation = useStartWorkout();
+  const updateSetMutation = useUpdateSet();
+  const completeWorkoutMutation = useCompleteWorkout();
 
-  if (!currentExercise) {
+  // Start the workout when component mounts
+  useEffect(() => {
+    if (scheduledWorkoutId && !workoutLog && !startWorkoutMutation.isPending) {
+      startWorkoutMutation.mutate(
+        { scheduledWorkoutId },
+        {
+          onSuccess: (data) => {
+            setWorkoutLog(data);
+            setWorkoutStartTime(new Date());
+          },
+          onError: () => {
+            router.push("/calendar");
+          },
+        }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scheduledWorkoutId]);
+
+  // Also set workout log from mutation data when available
+  useEffect(() => {
+    if (startWorkoutMutation.isSuccess && startWorkoutMutation.data && !workoutLog) {
+      setWorkoutLog(startWorkoutMutation.data);
+      setWorkoutStartTime(new Date());
+    }
+  }, [startWorkoutMutation.isSuccess, startWorkoutMutation.data, workoutLog]);
+
+  const currentExercise = workoutLog?.exercises[currentExerciseIndex];
+  const currentSet = currentExercise?.sets[currentSetIndex];
+
+  // Loading state
+  if (startWorkoutMutation.isPending || (!workoutLog && !startWorkoutMutation.isError)) {
     return (
-      <div className="p-4 text-center">
-        <SectionHeader
-          title="Workout Complete! 🎉"
-          description={`You have completed the ${mockWorkout.name} workout.`}
-        />
-        <Link href="/dashboard">
-          <Button className="mt-4">Return to Dashboard</Button>
-        </Link>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-primary">Starting workout...</span>
       </div>
     );
   }
 
-  const handleSetSubmit = (repsDone: number) => {
-    setLogs((prev) => [
-      ...prev,
-      {
-        exerciseId: currentExercise.exercise.id,
-        setNumber: currentSet,
-        repsDone,
-      },
-    ]);
+  // Error state
+  if (startWorkoutMutation.isError || !workoutLog) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-error mb-4">Failed to start workout</p>
+          <Button onClick={() => router.push("/calendar")}>Back to Calendar</Button>
+        </div>
+      </div>
+    );
+  }
 
-    // Move to next set or exercise
-    if (currentSet < currentExercise.sets) {
-      setCurrentSet(currentSet + 1);
-    } else {
-      setCurrentExerciseIndex(currentExerciseIndex + 1);
-      setCurrentSet(1);
-    }
+  // Workout complete state
+  if (!currentExercise) {
+    const handleFinishWorkout = () => {
+      if (!workoutLog || !workoutStartTime) return;
+
+      const duration = Math.floor(
+        (new Date().getTime() - workoutStartTime.getTime()) / 1000 / 60
+      );
+
+      completeWorkoutMutation.mutate(
+        {
+          workoutLogId: workoutLog.id,
+          duration,
+        },
+        {
+          onSuccess: () => {
+            router.push("/calendar");
+          },
+        }
+      );
+    };
+
+    return (
+      <div className="p-4 text-center space-y-4">
+        <SectionHeader
+          title="Workout Complete! 🎉"
+          description={`You have completed the ${workoutLog.name} workout.`}
+        />
+        <Button
+          onClick={handleFinishWorkout}
+          disabled={completeWorkoutMutation.isPending}
+        >
+          {completeWorkoutMutation.isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Saving...
+            </>
+          ) : (
+            "Finish Workout"
+          )}
+        </Button>
+      </div>
+    );
+  }
+
+  const handleSetSubmit = (repsDone: number, weight?: number) => {
+    if (!currentSet) return;
+
+    updateSetMutation.mutate(
+      {
+        setId: currentSet.id,
+        reps: repsDone,
+        weight: weight || null,
+        completed: true,
+      },
+      {
+        onSuccess: (updatedSet) => {
+          // Update local state
+          setWorkoutLog((prev) => {
+            if (!prev) return prev;
+            const newExercises = [...prev.exercises];
+            newExercises[currentExerciseIndex].sets[currentSetIndex] = updatedSet;
+            return { ...prev, exercises: newExercises };
+          });
+
+          // Move to next set or exercise
+          if (currentSetIndex < currentExercise.sets.length - 1) {
+            setCurrentSetIndex(currentSetIndex + 1);
+          } else if (currentExerciseIndex < workoutLog.exercises.length - 1) {
+            setCurrentExerciseIndex(currentExerciseIndex + 1);
+            setCurrentSetIndex(0);
+          } else {
+            // All exercises complete
+            setCurrentExerciseIndex(workoutLog.exercises.length);
+          }
+        },
+      }
+    );
   };
+
+  const completedSets = currentExercise.sets.filter((s) => s.completed).length;
 
   return (
     <div className="p-4 space-y-4 md:space-y-0 md:flex md:gap-6">
       {/* Left Column - Form + Logs */}
       <div className="md:w-1/2 space-y-4">
-        <h2 className="t3 font-semibold capitalize">
-          {currentExercise.exercise.name}
-        </h2>
-        <p className="text-muted-foreground">
-          Set {currentSet} of {currentExercise.sets} — {currentExercise.reps}{" "}
-          reps
-        </p>
+        <div>
+          <h2 className="t3 font-semibold capitalize">
+            {currentExercise.exercise.name}
+          </h2>
+          <p className="text-muted-foreground">
+            Exercise {currentExerciseIndex + 1} of {workoutLog.exercises.length}
+          </p>
+          <p className="text-accent">
+            Set {currentSetIndex + 1} of {currentExercise.sets.length} ({completedSets}{" "}
+            completed)
+          </p>
+        </div>
 
         <ExerciseFormItem
           data={{
-            exercise: currentExercise.exercise,
-            sets: currentExercise.sets,
-            reps: currentExercise.reps,
-            restTime: currentExercise.restTime,
+            exercise: currentExercise.exercise as any,
+            sets: currentExercise.sets.length,
+            reps: 0, // We'll show actual reps in the dialog
+            restTime: 60, // Default rest time
             notes: currentExercise.notes || undefined,
           }}
           mode="view"
@@ -129,68 +205,101 @@ export default function ActiveWorkoutPage() {
         {/* Log Set Dialog */}
         <Dialog open={logDialogOpen} onOpenChange={setLogDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full">Log Set</Button>
+            <Button className="w-full" disabled={currentSet?.completed}>
+              {currentSet?.completed ? "Set Completed" : "Log Set"}
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-sm">
             <DialogHeader>
               <DialogTitle>
-                Log {currentExercise.exercise.name} — Set {currentSet}
+                Log {currentExercise.exercise.name} — Set {currentSetIndex + 1}
               </DialogTitle>
               <p className="text-muted-foreground mt-1">
-                Enter reps completed for this set
+                Enter reps and weight for this set
               </p>
             </DialogHeader>
 
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                const reps = parseInt(
-                  (
-                    e.currentTarget.elements.namedItem(
-                      "reps"
-                    ) as HTMLInputElement
-                  ).value
-                );
-                handleSetSubmit(reps);
+                const formData = new FormData(e.currentTarget);
+                const reps = parseInt(formData.get("reps") as string);
+                const weight = formData.get("weight")
+                  ? parseFloat(formData.get("weight") as string)
+                  : undefined;
+                handleSetSubmit(reps, weight);
                 setLogDialogOpen(false);
               }}
               className="space-y-4 mt-4"
             >
-              <input
-                type="number"
-                name="reps"
-                defaultValue={currentExercise.reps}
-                min={0}
-                max={currentExercise.reps}
-                className="w-full border p-2 rounded"
-              />
-              <Button type="submit" className="w-full">
-                Save Set
+              <div>
+                <label className="text-sm font-medium">Reps</label>
+                <input
+                  type="number"
+                  name="reps"
+                  defaultValue={0}
+                  min={0}
+                  required
+                  className="w-full border p-2 rounded mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Weight (kg) - Optional</label>
+                <input
+                  type="number"
+                  name="weight"
+                  step="0.5"
+                  min={0}
+                  placeholder="0"
+                  className="w-full border p-2 rounded mt-1"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={updateSetMutation.isPending}
+              >
+                {updateSetMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Set"
+                )}
               </Button>
             </form>
           </DialogContent>
         </Dialog>
 
         {/* Logged Sets */}
-        <div className="mt-2 space-y-1">
-          <h3 className="t5 font-semibold">Logged Sets</h3>
-          {logs.map((log, index) => (
-            <p key={index} className="text-sm text-muted-foreground">
-              {
-                mockWorkout.exercises.find(
-                  (e) => e.exercise.id === log.exerciseId
-                )?.exercise.name
-              }{" "}
-              — Set {log.setNumber}: {log.repsDone} reps
-            </p>
-          ))}
+        <div className="mt-4 space-y-2">
+          <h3 className="t5 font-semibold">Completed Sets</h3>
+          <div className="space-y-1">
+            {workoutLog.exercises.map((ex, exIdx) => {
+              const completedSetsForEx = ex.sets.filter((s) => s.completed);
+              if (completedSetsForEx.length === 0) return null;
+
+              return (
+                <div key={ex.id} className="text-sm">
+                  <p className="font-medium text-primary">{ex.exercise.name}</p>
+                  {completedSetsForEx.map((set) => (
+                    <p key={set.id} className="text-muted-foreground ml-4">
+                      Set {set.setNumber}: {set.reps} reps
+                      {set.weight ? ` @ ${set.weight}kg` : ""}
+                    </p>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* Right Column - Details */}
       <div className="md:w-1/2 space-y-4">
         <ExerciseDetailsDisplay
-          exercise={currentExercise.exercise}
+          exercise={currentExercise.exercise as any}
           showImage={true}
           imageClassName="h-48 md:h-64 rounded-md"
         />

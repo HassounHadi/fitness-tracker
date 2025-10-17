@@ -28,6 +28,7 @@ export default function WeekCalendarPage() {
   const workouts = useMemo(() => {
     return scheduledWorkouts.map((sw) => ({
       id: sw.id,
+      scheduledWorkoutId: sw.id, // Add scheduled workout ID for navigation
       date: new Date(sw.scheduledDate),
       name: sw.template.name,
       duration: sw.template.exercises.reduce(
