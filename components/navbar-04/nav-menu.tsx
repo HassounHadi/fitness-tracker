@@ -32,7 +32,7 @@ export const NavMenu = (props: ComponentProps<typeof NavigationMenu>) => {
                 href={item.href}
                 className={cn(
                   "transition-colors",
-                  pathname === item.href
+                  pathname.startsWith(item.href)
                     ? "!text-primary font-medium hover:bg-transparent"
                     : "!text-muted-foreground hover:bg-accent/50"
                 )}
