@@ -46,8 +46,8 @@ export default function ActiveWorkoutPage() {
         { scheduledWorkoutId },
         {
           onSuccess: (data) => {
-            setWorkoutLog(data);
-            setWorkoutStartTime(new Date());
+            setWorkoutLog(data ?? null);
+            if (data) setWorkoutStartTime(new Date());
           },
           onError: () => {
             router.push("/calendar");
@@ -60,8 +60,12 @@ export default function ActiveWorkoutPage() {
 
   // Also set workout log from mutation data when available
   useEffect(() => {
-    if (startWorkoutMutation.isSuccess && startWorkoutMutation.data && !workoutLog) {
-      setWorkoutLog(startWorkoutMutation.data);
+    if (
+      startWorkoutMutation.isSuccess &&
+      startWorkoutMutation.data &&
+      !workoutLog
+    ) {
+      setWorkoutLog(startWorkoutMutation.data ?? null);
       setWorkoutStartTime(new Date());
     }
   }, [startWorkoutMutation.isSuccess, startWorkoutMutation.data, workoutLog]);
@@ -70,7 +74,10 @@ export default function ActiveWorkoutPage() {
   const currentSet = currentExercise?.sets[currentSetIndex];
 
   // Loading state
-  if (startWorkoutMutation.isPending || (!workoutLog && !startWorkoutMutation.isError)) {
+  if (
+    startWorkoutMutation.isPending ||
+    (!workoutLog && !startWorkoutMutation.isError)
+  ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -85,7 +92,9 @@ export default function ActiveWorkoutPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p className="text-error mb-4">Failed to start workout</p>
-          <Button onClick={() => router.push("/calendar")}>Back to Calendar</Button>
+          <Button onClick={() => router.push("/calendar")}>
+            Back to Calendar
+          </Button>
         </div>
       </div>
     );
@@ -151,8 +160,18 @@ export default function ActiveWorkoutPage() {
           // Update local state
           setWorkoutLog((prev) => {
             if (!prev) return prev;
+            // If the mutation didn't return an updated set, do nothing.
+            if (!updatedSet) return prev;
+
+            // Clone exercises and the targeted exercise/sets to avoid mutating state
             const newExercises = [...prev.exercises];
-            newExercises[currentExerciseIndex].sets[currentSetIndex] = updatedSet;
+            const currentEx = { ...newExercises[currentExerciseIndex] };
+            const newSets = [...currentEx.sets];
+
+            newSets[currentSetIndex] = updatedSet;
+            currentEx.sets = newSets;
+            newExercises[currentExerciseIndex] = currentEx;
+
             return { ...prev, exercises: newExercises };
           });
 
@@ -185,8 +204,8 @@ export default function ActiveWorkoutPage() {
             Exercise {currentExerciseIndex + 1} of {workoutLog.exercises.length}
           </p>
           <p className="text-accent">
-            Set {currentSetIndex + 1} of {currentExercise.sets.length} ({completedSets}{" "}
-            completed)
+            Set {currentSetIndex + 1} of {currentExercise.sets.length} (
+            {completedSets} completed)
           </p>
         </div>
 
@@ -244,7 +263,9 @@ export default function ActiveWorkoutPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Weight (kg) - Optional</label>
+                <label className="text-sm font-medium">
+                  Weight (kg) - Optional
+                </label>
                 <input
                   type="number"
                   name="weight"
