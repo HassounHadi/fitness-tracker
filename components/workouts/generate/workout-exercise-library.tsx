@@ -25,6 +25,7 @@ interface WorkoutExerciseLibraryProps {
   onDragStart: (e: React.DragEvent, exercise: Exercise) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
+  disabled?: boolean;
 }
 
 export function WorkoutExerciseLibrary({
@@ -45,13 +46,22 @@ export function WorkoutExerciseLibrary({
   onDragStart,
   onDragOver,
   onDrop,
+  disabled = false,
 }: WorkoutExerciseLibraryProps) {
   return (
     <Card
-      className="flex flex-col h-full"
-      onDragOver={onDragOver}
-      onDrop={onDrop}
+      className="flex flex-col h-full relative"
+      onDragOver={disabled ? undefined : onDragOver}
+      onDrop={disabled ? undefined : onDrop}
     >
+      {disabled && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
+          <div className="text-center">
+            <p className="t5 text-primary mb-2">AI is generating workout...</p>
+            <p className="p3 text-accent">Please wait</p>
+          </div>
+        </div>
+      )}
       <CardHeader className="flex-shrink-0">
         <CardTitle className="text-primary">Exercise Library</CardTitle>
       </CardHeader>
@@ -87,9 +97,9 @@ export function WorkoutExerciseLibrary({
               {exercises.slice(0, 50).map((exercise) => (
                 <div
                   key={exercise.id}
-                  draggable
-                  onDragStart={(e) => onDragStart(e, exercise)}
-                  className="cursor-move"
+                  draggable={!disabled}
+                  onDragStart={disabled ? undefined : (e) => onDragStart(e, exercise)}
+                  className={disabled ? "cursor-not-allowed opacity-50" : "cursor-move"}
                 >
                   <DraggableExerciseCard exercise={exercise} />
                 </div>

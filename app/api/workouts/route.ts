@@ -8,6 +8,7 @@ import { z } from "zod";
 const createWorkoutSchema = z.object({
   name: z.string().min(1, "Workout name is required"),
   description: z.string().optional(),
+  isAiGenerated: z.boolean().optional().default(false),
   exercises: z.array(
     z.object({
       exerciseId: z.string(),
@@ -38,13 +39,13 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: "Invalid request data",
-          errors: validation.error.errors,
+          errors: validation.error.format(),
         },
         { status: 400 }
       );
     }
 
-    const { name, description, exercises } = validation.data;
+    const { name, description, isAiGenerated, exercises } = validation.data;
 
     // Create workout template with exercises in a transaction
     const workout = await prisma.workoutTemplate.create({
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         name,
         description: description || null,
-        isAiGenerated: false,
+        isAiGenerated: isAiGenerated ?? false,
         exercises: {
           create: exercises.map((exercise, index) => ({
             exerciseId: exercise.exerciseId,

@@ -18,13 +18,18 @@ export function useWorkoutBuilder() {
   const [draggedWorkoutIndex, setDraggedWorkoutIndex] = useState<number | null>(null);
 
   const addExercise = useCallback(
-    (exercise: Exercise, insertIndex?: number) => {
+    (
+      exercise: Exercise,
+      insertIndex?: number,
+      initialValues?: { sets?: number; reps?: number; restTime?: number; notes?: string }
+    ) => {
       const newExercise: WorkoutExercise = {
-        id: `${exercise.id}-${Date.now()}`,
+        id: `${exercise.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         exercise,
-        sets: 3,
-        reps: 10,
-        restTime: 60,
+        sets: initialValues?.sets ?? 3,
+        reps: initialValues?.reps ?? 10,
+        restTime: initialValues?.restTime ?? 60,
+        notes: initialValues?.notes,
       };
 
       // Remove exercise from library

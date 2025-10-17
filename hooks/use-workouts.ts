@@ -5,6 +5,7 @@ import type { WorkoutTemplate, TemplateExercise, Exercise } from "@prisma/client
 export interface CreateWorkoutPayload {
   name: string;
   description?: string;
+  isAiGenerated?: boolean;
   exercises: {
     exerciseId: string;
     sets: number;
@@ -12,6 +13,30 @@ export interface CreateWorkoutPayload {
     restTime: number;
     notes?: string;
   }[];
+}
+
+export interface GenerateAIWorkoutPayload {
+  goal: string;
+  duration: number;
+  targetMuscles: string[];
+  instructions?: string;
+  exercises: {
+    id: string;
+    name: string;
+  }[];
+}
+
+export interface AIWorkoutResponse {
+  workoutName: string;
+  workoutDescription: string;
+  exercises: {
+    exerciseId: string;
+    sets: number;
+    reps: number;
+    restTime: number;
+    notes?: string;
+  }[];
+  totalDuration: number;
 }
 
 export type WorkoutWithExercises = WorkoutTemplate & {
@@ -52,5 +77,24 @@ export function useCreateWorkout() {
       // Invalidate and refetch workouts
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
     },
+  });
+}
+
+export function useGenerateAIWorkout() {
+  return useMutation({
+    mutationFn: async (payload: GenerateAIWorkoutPayload) => {
+      const response = await api.post<AIWorkoutResponse>(
+        "/api/gemini/workout-generator",
+        payload,
+        {
+          showToast: false, // We'll handle errors in the component
+        }
+      );
+
+      if (response.success && response.data) return response.data;
+
+      throw new Error(response.message || "Failed to generate workout");
+    },
+    retry: false, // Don't retry on failure
   });
 }

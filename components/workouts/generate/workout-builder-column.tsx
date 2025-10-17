@@ -15,6 +15,8 @@ interface WorkoutBuilderColumnProps {
   workoutDescription: string;
   workoutExercises: WorkoutExercise[];
   draggedWorkoutIndex: number | null;
+  isSaving?: boolean;
+  disabled?: boolean;
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onUpdateExercise: (
@@ -35,6 +37,8 @@ export function WorkoutBuilderColumn({
   workoutDescription,
   workoutExercises,
   draggedWorkoutIndex,
+  isSaving = false,
+  disabled = false,
   onNameChange,
   onDescriptionChange,
   onUpdateExercise,
@@ -48,10 +52,18 @@ export function WorkoutBuilderColumn({
 }: WorkoutBuilderColumnProps) {
   return (
     <Card
-      onDragOver={onDragOver}
-      onDrop={(e) => onDrop(e)}
-      className="flex flex-col h-full"
+      onDragOver={disabled ? undefined : onDragOver}
+      onDrop={disabled ? undefined : (e) => onDrop(e)}
+      className="flex flex-col h-full relative"
     >
+      {disabled && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
+          <div className="text-center">
+            <p className="t5 text-primary mb-2">AI is generating workout...</p>
+            <p className="p3 text-accent">Please wait</p>
+          </div>
+        </div>
+      )}
       <CardHeader className="flex-shrink-0">
         <CardTitle className="text-primary">Build Your Workout</CardTitle>
       </CardHeader>
@@ -68,6 +80,7 @@ export function WorkoutBuilderColumn({
             placeholder="e.g., Upper Body Blast"
             value={workoutName}
             onChange={(e) => onNameChange(e.target.value)}
+            disabled={disabled}
           />
         </div>
 
@@ -79,6 +92,7 @@ export function WorkoutBuilderColumn({
             value={workoutDescription}
             onChange={(e) => onDescriptionChange(e.target.value)}
             rows={2}
+            disabled={disabled}
           />
         </div>
 
@@ -90,6 +104,7 @@ export function WorkoutBuilderColumn({
               size="sm"
               onClick={onClearWorkout}
               className="h-8 text-error"
+              disabled={disabled}
             >
               <Trash2 className="h-4 w-4 mr-1" />
               Clear All
@@ -130,9 +145,10 @@ export function WorkoutBuilderColumn({
               onClick={onSaveWorkout}
               className="w-full gap-2 hover:scale-100"
               size="lg"
+              disabled={isSaving || disabled || !workoutName.trim()}
             >
-              <Save className="h-4 w-4" />
-              Save Workout
+              <Save className={isSaving ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+              {isSaving ? "Saving..." : "Save Workout"}
             </Button>
           </div>
         )}

@@ -72,13 +72,17 @@ Do not include any markdown, explanations, or text outside the JSON object.
     // Parse the JSON response
     const workoutPlan = JSON.parse(cleanedText);
 
-    return NextResponse.json(workoutPlan);
+    return NextResponse.json({
+      success: true,
+      data: workoutPlan,
+      message: "Workout generated successfully",
+    });
   } catch (error: any) {
     console.error("Gemini workout generation error:", error);
     return NextResponse.json(
       {
-        error: "Failed to generate workout plan",
-        details: error.message,
+        success: false,
+        message: error.message || "Failed to generate workout plan",
       },
       { status: 500 }
     );

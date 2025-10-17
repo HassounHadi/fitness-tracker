@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { SectionHeader } from "@/components/common/section-header";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +9,7 @@ import { Sparkles, GripVertical, Dumbbell } from "lucide-react";
 import { useExercises } from "@/hooks/use-exercises";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useWorkoutBuilder } from "@/hooks/use-workout-builder";
+import { useCreateWorkout, useGenerateAIWorkout } from "@/hooks/use-workouts";
 import { WorkoutExerciseLibrary } from "@/components/workouts/generate/workout-exercise-library";
 import { WorkoutBuilderColumn } from "@/components/workouts/generate/workout-builder-column";
 import { AIGeneratorColumn } from "@/components/workouts/generate/ai-generator-column";
@@ -45,6 +47,10 @@ export default function GenerateWorkoutPage() {
   const [aiDuration, setAiDuration] = useState("");
   const [aiTargetMuscles, setAiTargetMuscles] = useState<string[]>([]);
   const [aiInstructions, setAiInstructions] = useState("");
+
+  // Mutations
+  const createWorkoutMutation = useCreateWorkout();
+  const generateAIWorkoutMutation = useGenerateAIWorkout();
 
   // Mobile View State
   const [mobileView, setMobileView] = useState<"exercises" | "workout" | "ai">(
@@ -147,82 +153,94 @@ export default function GenerateWorkoutPage() {
     setDraggedWorkoutIndex(null);
   };
 
-  const handleSaveWorkout = () => {
-    // TODO: Implement save workout functionality
-    console.log("Save workout:", {
-      name: workoutName,
-      description: workoutDescription,
-      exercises: workoutExercises,
-    });
-  };
+  const handleSaveWorkout = async () => {
+    // Validate workout has required fields
+    if (!workoutName.trim()) {
+      toast.error("Please enter a workout name");
+      return;
+    }
 
-  const [aiLoading, setAiLoading] = useState(false);
-
-  const handleGenerateAI = async () => {
-    setAiLoading(true);
+    if (workoutExercises.length === 0) {
+      toast.error("Please add at least one exercise to your workout");
+      return;
+    }
 
     try {
-      // Prepare minimal exercise data (only ID and name)
-      const exerciseReferences = exercisesData.map((ex) => ({
-        id: ex.id,
-        name: ex.name,
-      }));
-
-      const res = await fetch("/api/gemini/workout-generator", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          goal: aiGoal,
-          duration: parseInt(aiDuration),
-          targetMuscles: aiTargetMuscles,
-          instructions: aiInstructions,
-          exercises: exerciseReferences,
-        }),
+      await createWorkoutMutation.mutateAsync({
+        name: workoutName,
+        description: workoutDescription || undefined,
+        isAiGenerated: true, // All workouts from this page are AI-generated
+        exercises: workoutExercises.map((we) => ({
+          exerciseId: we.exercise.id,
+          sets: we.sets,
+          reps: we.reps,
+          restTime: we.restTime,
+          notes: we.notes,
+        })),
       });
 
-      const data = await res.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Clear existing workout first
+      // Clear the workout builder on success
       clearWorkout();
-
-      // Set AI-generated workout name and description
-      setWorkoutName(data.workoutName || "AI Generated Workout");
-      setWorkoutDescription(
-        data.workoutDescription || "Personalized workout created by AI"
-      );
-
-      // Add each exercise to the workout
-      data.exercises.forEach((aiExercise: any) => {
-        const fullExercise = exercisesData.find(
-          (ex) => ex.id === aiExercise.exerciseId
-        );
-        if (fullExercise) {
-          addExercise(fullExercise);
-          // Update the exercise with AI-recommended sets, reps, and rest
-          const exerciseId = `${fullExercise.id}-${Date.now()}`;
-          setTimeout(() => {
-            updateExercise(exerciseId, {
-              sets: aiExercise.sets || 3,
-              reps: aiExercise.reps || 10,
-              restTime: aiExercise.restTime || 60,
-              notes: aiExercise.notes,
-            });
-          }, 100);
-        }
-      });
-
-      console.log("✅ Workout generated successfully!");
-    } catch (err: any) {
-      console.error("❌ Error generating workout:", err);
-      alert(`Failed to generate workout: ${err.message}`);
-    } finally {
-      setAiLoading(false);
+    } catch (error: any) {
+      console.error("Failed to save workout:", error);
+      // Error toast is already shown by the mutation
     }
   };
+
+  const handleGenerateAI = () => {
+    // Prepare minimal exercise data (only ID and name)
+    const exerciseReferences = exercisesData.map((ex) => ({
+      id: ex.id,
+      name: ex.name,
+    }));
+
+    generateAIWorkoutMutation.mutate(
+      {
+        goal: aiGoal,
+        duration: parseInt(aiDuration),
+        targetMuscles: aiTargetMuscles,
+        instructions: aiInstructions,
+        exercises: exerciseReferences,
+      },
+      {
+        onSuccess: (data) => {
+          // Clear existing workout first
+          clearWorkout();
+
+          // Set AI-generated workout name and description
+          setWorkoutName(data.workoutName || "AI Generated Workout");
+          setWorkoutDescription(
+            data.workoutDescription || "Personalized workout created by AI"
+          );
+
+          // Add exercises with AI-recommended values
+          data.exercises.forEach((aiExercise) => {
+            const fullExercise = exercisesData.find(
+              (ex) => ex.id === aiExercise.exerciseId
+            );
+            if (fullExercise) {
+              // Add exercise with initial values directly
+              addExercise(fullExercise, undefined, {
+                sets: aiExercise.sets || 3,
+                reps: aiExercise.reps || 10,
+                restTime: aiExercise.restTime || 60,
+                notes: aiExercise.notes,
+              });
+            }
+          });
+
+          toast.success("Workout generated successfully!");
+        },
+        onError: (err: any) => {
+          console.error("❌ Error generating workout:", err);
+          toast.error(err.message || "Failed to generate workout");
+        },
+      }
+    );
+  };
+
+  // Check if AI is generating
+  const isGenerating = generateAIWorkoutMutation.isPending;
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
@@ -314,6 +332,7 @@ export default function GenerateWorkoutPage() {
             onDragStart={handleLibraryDragStart}
             onDragOver={handleLibraryDragOver}
             onDrop={handleLibraryDrop}
+            disabled={isGenerating}
           />
         </div>
 
@@ -324,6 +343,8 @@ export default function GenerateWorkoutPage() {
             workoutDescription={workoutDescription}
             workoutExercises={workoutExercises}
             draggedWorkoutIndex={draggedWorkoutIndex}
+            isSaving={createWorkoutMutation.isPending}
+            disabled={isGenerating}
             onNameChange={setWorkoutName}
             onDescriptionChange={setWorkoutDescription}
             onUpdateExercise={updateExercise}
@@ -349,7 +370,7 @@ export default function GenerateWorkoutPage() {
             onTargetMusclesChange={setAiTargetMuscles}
             onInstructionsChange={setAiInstructions}
             onGenerate={handleGenerateAI}
-            loading={aiLoading}
+            loading={isGenerating}
           />
         </div>
       </div>
