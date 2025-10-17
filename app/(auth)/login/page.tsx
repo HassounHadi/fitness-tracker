@@ -11,7 +11,7 @@ import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { GoogleIcon } from "@/public/icons/GoogleIcon";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useLogin } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
@@ -23,7 +23,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams();
   const loginMutation = useLogin();
 
@@ -114,5 +114,13 @@ export default function LoginPage() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
