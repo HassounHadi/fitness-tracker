@@ -5,13 +5,12 @@ import { ChevronLeft, ChevronRight, Dumbbell } from "lucide-react";
 import {
   addDays,
   isSameDay,
-  startOfWeek,
   subWeeks,
   addWeeks,
   format,
+  startOfDay,
 } from "date-fns";
 import { Button } from "../ui/button";
-import { useState } from "react";
 
 interface Workout {
   id: string;
@@ -24,27 +23,39 @@ interface WeekCalendarProps {
   selectedDay: Date;
   onSelectDay: (day: Date) => void;
   workouts: Workout[];
+  currentWeekStart: Date;
+  onWeekChange: (date: Date) => void;
+  isLoading?: boolean;
 }
 
 export function WeekCalendar({
   selectedDay,
   onSelectDay,
   workouts,
+  currentWeekStart,
+  onWeekChange,
+  isLoading,
 }: WeekCalendarProps) {
-  const [currentWeekStart, setCurrentWeekStart] = useState(
-    startOfWeek(new Date(), { weekStartsOn: 1 })
-  );
-
   const weekDays = Array.from({ length: 7 }, (_, i) =>
     addDays(currentWeekStart, i)
   );
 
-  const goToPreviousWeek = () =>
-    setCurrentWeekStart(subWeeks(currentWeekStart, 1));
-  const goToNextWeek = () => setCurrentWeekStart(addWeeks(currentWeekStart, 1));
+  const goToPreviousWeek = () => {
+    const today = startOfDay(new Date());
+    const newWeekStart = subWeeks(currentWeekStart, 1);
+    // Don't allow going before today
+    if (newWeekStart >= today) {
+      onWeekChange(newWeekStart);
+    }
+  };
+
+  const goToNextWeek = () => {
+    onWeekChange(addWeeks(currentWeekStart, 1));
+  };
+
   const goToToday = () => {
     const today = new Date();
-    setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));
+    onWeekChange(startOfDay(today));
     onSelectDay(today);
   };
 
@@ -58,7 +69,7 @@ export function WeekCalendar({
           Week of {format(currentWeekStart, "MMM d")}
         </CardTitle>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToToday}>
+          <Button variant="secondary" size="sm" onClick={goToToday}>
             Today
           </Button>
           <Button variant="ghost" size="icon-sm" onClick={goToPreviousWeek}>

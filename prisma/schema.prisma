@@ -39,6 +39,7 @@ model User {
   sessions         Session[]
   savedExercises   SavedExercise[]
   workoutTemplates WorkoutTemplate[]
+  scheduledWorkouts ScheduledWorkout[]
   workoutLogs      WorkoutLog[]
   progressLogs     ProgressLog[]
   nutritionLogs    NutritionLog[]
@@ -140,6 +141,7 @@ model WorkoutTemplate {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercises   TemplateExercise[]
   workoutLogs WorkoutLog[]
+  scheduledWorkouts ScheduledWorkout[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -163,6 +165,26 @@ model TemplateExercise {
   createdAt  DateTime @default(now())
 
   @@index([templateId])
+}
+
+// ==================== Scheduled Workout Models ====================
+
+model ScheduledWorkout {
+  id          String   @id @default(cuid())
+  userId      String
+  templateId  String
+  scheduledDate DateTime  // The date this workout is scheduled for
+  completed   Boolean  @default(false)
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    WorkoutTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, scheduledDate]) // Only one workout per day per user
+  @@index([userId])
+  @@index([scheduledDate])
 }
 
 // ==================== Workout Logging Models ====================

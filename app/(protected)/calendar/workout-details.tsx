@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Dumbbell } from "lucide-react";
 import { Target, Check } from "lucide-react";
 
@@ -24,9 +25,10 @@ interface Workout {
 interface WorkoutDetailsProps {
   workout: Workout | undefined;
   selectedDay: Date;
+  onAddWorkout: () => void;
 }
 
-export function WorkoutDetails({ workout, selectedDay }: WorkoutDetailsProps) {
+export function WorkoutDetails({ workout, selectedDay, onAddWorkout }: WorkoutDetailsProps) {
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -40,6 +42,9 @@ export function WorkoutDetails({ workout, selectedDay }: WorkoutDetailsProps) {
           <div className="flex flex-col items-center justify-center py-6 text-center">
             <Dumbbell className="h-16 w-16 text-muted-foreground mb-4" />
             <p className="text-primary mb-2">No workout scheduled</p>
+            <Button onClick={onAddWorkout} className="mt-2">
+              Add Workout
+            </Button>
           </div>
         ) : (
           <Card className="border-2">
