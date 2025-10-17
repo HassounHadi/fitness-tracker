@@ -5,6 +5,7 @@ import { SectionHeader } from "@/components/common/section-header";
 import { Calendar, Apple } from "lucide-react";
 import { CircularRings } from "@/components/ui/circular-rings";
 import { NutritionLogDialog } from "@/components/dashboard/nutrition-log-dialog";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const nutritionRings = [
@@ -60,7 +61,9 @@ export default function DashboardPage() {
                     5 exercises • 45 min
                   </p>
                 </div>
-                <Button size="sm">Start</Button>
+                <Link href="/active-workout">
+                  <Button size="sm">Start</Button>
+                </Link>
               </div>
             </div>
           </CardContent>

@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ExerciseFormItem } from "@/components/exercises/exercise-form-item";
 import { ExerciseDetailsDisplay } from "@/components/exercises/exercise-details-display";
+import { SectionHeader } from "@/components/common/section-header";
+import Link from "next/link";
 
 // -------------------- Mock Workout --------------------
 const mockWorkout = {
@@ -69,17 +71,19 @@ export default function ActiveWorkoutPage() {
 
   if (!currentExercise) {
     return (
-      <div className="p-6 text-center">
-        <h2 className="t3 font-semibold">Workout Complete! 🎉</h2>
-        <p className="mt-2 text-muted-foreground">
-          You logged all exercises for {mockWorkout.name}.
-        </p>
+      <div className="p-4 text-center">
+        <SectionHeader
+          title="Workout Complete! 🎉"
+          description={`You have completed the ${mockWorkout.name} workout.`}
+        />
+        <Link href="/dashboard">
+          <Button className="mt-4">Return to Dashboard</Button>
+        </Link>
       </div>
     );
   }
 
   const handleSetSubmit = (repsDone: number) => {
-    // Save log for current set (client-side state)
     setLogs((prev) => [
       ...prev,
       {
@@ -89,111 +93,107 @@ export default function ActiveWorkoutPage() {
       },
     ]);
 
-    // --- Place to call API to save log to DB ---
-    // await fetch("/api/workout-log", {
-    //   method: "POST",
-    //   body: JSON.stringify({
-    //     workoutId: mockWorkout.id,
-    //     exerciseId: currentExercise.exercise.id,
-    //     setNumber: currentSet,
-    //     repsDone,
-    //   }),
-    // });
-
-    // Move to next set or next exercise
+    // Move to next set or exercise
     if (currentSet < currentExercise.sets) {
       setCurrentSet(currentSet + 1);
-      setLogDialogOpen(true);
     } else {
       setCurrentExerciseIndex(currentExerciseIndex + 1);
       setCurrentSet(1);
-      setLogDialogOpen(true);
     }
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h2 className="t3 font-semibold capitalize">
-        {currentExercise.exercise.name}
-      </h2>
-      <p className="text-muted-foreground">
-        Set {currentSet} of {currentExercise.sets} — {currentExercise.reps} reps
-      </p>
+    <div className="p-4 space-y-4 md:space-y-0 md:flex md:gap-6">
+      {/* Left Column - Form + Logs */}
+      <div className="md:w-1/2 space-y-4">
+        <h2 className="t3 font-semibold capitalize">
+          {currentExercise.exercise.name}
+        </h2>
+        <p className="text-muted-foreground">
+          Set {currentSet} of {currentExercise.sets} — {currentExercise.reps}{" "}
+          reps
+        </p>
 
-      <ExerciseFormItem
-        data={{
-          exercise: currentExercise.exercise,
-          sets: currentExercise.sets,
-          reps: currentExercise.reps,
-          restTime: currentExercise.restTime,
-          notes: currentExercise.notes || undefined,
-        }}
-        mode="view"
-        showImage={false}
-      />
+        <ExerciseFormItem
+          data={{
+            exercise: currentExercise.exercise,
+            sets: currentExercise.sets,
+            reps: currentExercise.reps,
+            restTime: currentExercise.restTime,
+            notes: currentExercise.notes || undefined,
+          }}
+          mode="view"
+          showImage={false}
+        />
 
-      <ExerciseDetailsDisplay
-        exercise={currentExercise.exercise}
-        showImage={true}
-        imageClassName="h-64 md:h-80 mb-6"
-      />
+        {/* Log Set Dialog */}
+        <Dialog open={logDialogOpen} onOpenChange={setLogDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full">Log Set</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle>
+                Log {currentExercise.exercise.name} — Set {currentSet}
+              </DialogTitle>
+              <p className="text-muted-foreground mt-1">
+                Enter reps completed for this set
+              </p>
+            </DialogHeader>
 
-      {/* Log Set Dialog */}
-      <Dialog open={logDialogOpen} onOpenChange={setLogDialogOpen}>
-        <DialogTrigger asChild>
-          <Button className="w-full mt-4">Log Set</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>
-              Log {currentExercise.exercise.name} — Set {currentSet}
-            </DialogTitle>
-            <p className="text-muted-foreground mt-1">
-              Enter reps completed for this set
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const reps = parseInt(
+                  (
+                    e.currentTarget.elements.namedItem(
+                      "reps"
+                    ) as HTMLInputElement
+                  ).value
+                );
+                handleSetSubmit(reps);
+                setLogDialogOpen(false);
+              }}
+              className="space-y-4 mt-4"
+            >
+              <input
+                type="number"
+                name="reps"
+                defaultValue={currentExercise.reps}
+                min={0}
+                max={currentExercise.reps}
+                className="w-full border p-2 rounded"
+              />
+              <Button type="submit" className="w-full">
+                Save Set
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Logged Sets */}
+        <div className="mt-2 space-y-1">
+          <h3 className="t5 font-semibold">Logged Sets</h3>
+          {logs.map((log, index) => (
+            <p key={index} className="text-sm text-muted-foreground">
+              {
+                mockWorkout.exercises.find(
+                  (e) => e.exercise.id === log.exerciseId
+                )?.exercise.name
+              }{" "}
+              — Set {log.setNumber}: {log.repsDone} reps
             </p>
-          </DialogHeader>
+          ))}
+        </div>
+      </div>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const reps = parseInt(
-                (e.currentTarget.elements.namedItem("reps") as HTMLInputElement)
-                  .value
-              );
-              handleSetSubmit(reps);
-              setLogDialogOpen(false);
-            }}
-            className="space-y-4 mt-4"
-          >
-            <input
-              type="number"
-              name="reps"
-              defaultValue={currentExercise.reps}
-              min={0}
-              max={currentExercise.reps}
-              className="w-full border p-2 rounded"
-            />
-            <Button type="submit" className="w-full">
-              Save Set
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Logs */}
-      <div className="mt-4">
-        <h3 className="t5 font-semibold">Logged Sets</h3>
-        {logs.map((log, index) => (
-          <p key={index} className="text-sm text-muted-foreground">
-            Exercise:{" "}
-            {
-              mockWorkout.exercises.find(
-                (e) => e.exercise.id === log.exerciseId
-              )?.exercise.name
-            }{" "}
-            — Set {log.setNumber}: {log.repsDone} reps
-          </p>
-        ))}
+      {/* Right Column - Details */}
+      <div className="md:w-1/2 space-y-4">
+        <ExerciseDetailsDisplay
+          exercise={currentExercise.exercise}
+          showImage={true}
+          imageClassName="h-48 md:h-64 rounded-md"
+        />
       </div>
     </div>
   );
