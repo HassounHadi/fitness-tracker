@@ -60,7 +60,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (existingExercise) {
-      return NextResponse.json(existingExercise);
+      return NextResponse.json({
+        success: true,
+        message: "Exercise already started",
+        data: existingExercise,
+      });
     }
 
     // Create the logged exercise (no sets yet)
@@ -81,7 +85,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(loggedExercise);
+    return NextResponse.json({
+      success: true,
+      message: "Exercise started successfully",
+      data: loggedExercise,
+    });
   } catch (error) {
     console.error("Error starting exercise:", error);
 

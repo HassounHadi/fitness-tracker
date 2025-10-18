@@ -70,7 +70,11 @@ export async function POST(req: NextRequest) {
           completed: true,
         },
       });
-      return NextResponse.json(updatedSet);
+      return NextResponse.json({
+        success: true,
+        message: "Set updated successfully",
+        data: updatedSet,
+      });
     }
 
     // Create new set
@@ -84,7 +88,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(newSet);
+    return NextResponse.json({
+      success: true,
+      message: "Set created successfully",
+      data: newSet,
+    });
   } catch (error) {
     console.error("Error creating set:", error);
 
