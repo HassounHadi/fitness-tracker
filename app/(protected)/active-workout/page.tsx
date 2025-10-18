@@ -58,19 +58,16 @@ export default function ActiveWorkoutPage() {
   const completeWorkoutMutation = useCompleteWorkout();
 
   // Track when workoutLog changes
-  useEffect(() => {
-    console.log("WorkoutLog state changed to:", workoutLog);
-  }, [workoutLog]);
+  useEffect(() => {}, [workoutLog]);
 
   // Start the workout when component mounts - ONLY ONCE
   useEffect(() => {
     if (scheduledWorkoutId && !hasStartedRef.current && !workoutLog) {
       hasStartedRef.current = true;
-      console.log("CALLING MUTATE ASYNC WITH:", scheduledWorkoutId);
 
-      startWorkoutMutation.mutateAsync({ scheduledWorkoutId })
+      startWorkoutMutation
+        .mutateAsync({ scheduledWorkoutId })
         .then((data) => {
-          console.log("✅ MUTATE ASYNC SUCCESS - DATA:", data);
           setWorkoutLog(data ?? null);
           setWorkoutStartTime(new Date());
         })
@@ -90,8 +87,6 @@ export default function ActiveWorkoutPage() {
   const currentLoggedExercise = loggedExercises.find(
     (ex) => ex.exerciseId === currentTemplateExercise?.exerciseId
   );
-
-  console.log("WORKOUT LOG: ", workoutLog);
 
   // If no workout log yet, show a simple message
   if (!workoutLog) {
@@ -156,8 +151,6 @@ export default function ActiveWorkoutPage() {
   const handleStartExercise = () => {
     if (!currentTemplateExercise || currentLoggedExercise) return;
 
-    console.log("Starting exercise:", currentTemplateExercise.exercise.name);
-
     startExerciseMutation
       .mutateAsync({
         workoutLogId: workoutLog.id,
@@ -166,8 +159,6 @@ export default function ActiveWorkoutPage() {
         notes: currentTemplateExercise.notes || undefined,
       })
       .then((loggedExercise) => {
-        console.log("✅ Exercise started successfully:", loggedExercise);
-
         if (!loggedExercise) {
           console.error("No logged exercise returned from API");
           return;
@@ -191,8 +182,6 @@ export default function ActiveWorkoutPage() {
   const handleSetSubmit = (repsDone: number, weight?: number) => {
     if (!currentLoggedExercise) return;
 
-    console.log("Logging set:", { repsDone, weight, setNumber: currentSetIndex + 1 });
-
     createSetMutation
       .mutateAsync({
         loggedExerciseId: currentLoggedExercise.id,
@@ -201,8 +190,6 @@ export default function ActiveWorkoutPage() {
         weight: weight || null,
       })
       .then((newSet) => {
-        console.log("✅ Set logged successfully:", newSet);
-
         if (!newSet) {
           console.error("No set returned from API");
           return;

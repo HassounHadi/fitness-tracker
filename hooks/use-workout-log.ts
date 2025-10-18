@@ -108,15 +108,10 @@ export function useStartWorkout() {
   return useMutation({
     mutationFn: async (payload: StartWorkoutPayload) => {
       try {
-        console.log("START: Calling API with payload:", payload);
         const response = await api.post<WorkoutLog>(
           "/api/workout-logs/start",
           payload
         );
-        console.log("API Response in hook:", response);
-        console.log("response.success:", response.success);
-        console.log("response.data:", response.data);
-        console.log("response.data type:", typeof response.data);
 
         // Check if the API call was actually successful
         if (!response.success) {
@@ -124,7 +119,6 @@ export function useStartWorkout() {
           throw new Error(response.message || "Failed to start workout");
         }
 
-        console.log("RETURNING FROM MUTATION FN:", response.data);
         return response.data;
       } catch (error) {
         console.error("ERROR in mutationFn:", error);
@@ -132,7 +126,6 @@ export function useStartWorkout() {
       }
     },
     onSuccess: (data) => {
-      console.log("MUTATION onSuccess CALLED WITH:", data);
       // Invalidate scheduled workouts to refresh calendar
       queryClient.invalidateQueries({ queryKey: ["scheduled-workouts"] });
     },
@@ -192,19 +185,19 @@ export function useStartExercise() {
   return useMutation({
     mutationFn: async (payload: StartExercisePayload) => {
       try {
-        console.log("START EXERCISE: Calling API with payload:", payload);
         const response = await api.post<LoggedExercise>(
           "/api/workout-logs/exercise",
           payload
         );
-        console.log("START EXERCISE: API Response:", response);
 
         if (!response.success) {
-          console.error("START EXERCISE: API returned success=false:", response);
+          console.error(
+            "START EXERCISE: API returned success=false:",
+            response
+          );
           throw new Error(response.message || "Failed to start exercise");
         }
 
-        console.log("START EXERCISE: Returning data:", response.data);
         return response.data;
       } catch (error) {
         console.error("START EXERCISE: ERROR in mutationFn:", error);
@@ -212,7 +205,6 @@ export function useStartExercise() {
       }
     },
     onSuccess: (data) => {
-      console.log("START EXERCISE: onSuccess called with:", data);
       queryClient.invalidateQueries({ queryKey: ["workout-log"] });
     },
     onError: (error) => {
@@ -230,19 +222,16 @@ export function useCreateSet() {
   return useMutation({
     mutationFn: async (payload: CreateSetPayload) => {
       try {
-        console.log("CREATE SET: Calling API with payload:", payload);
         const response = await api.post<LoggedSet>(
           "/api/workout-logs/sets",
           payload
         );
-        console.log("CREATE SET: API Response:", response);
 
         if (!response.success) {
           console.error("CREATE SET: API returned success=false:", response);
           throw new Error(response.message || "Failed to create set");
         }
 
-        console.log("CREATE SET: Returning data:", response.data);
         return response.data;
       } catch (error) {
         console.error("CREATE SET: ERROR in mutationFn:", error);
@@ -250,7 +239,6 @@ export function useCreateSet() {
       }
     },
     onSuccess: (data) => {
-      console.log("CREATE SET: onSuccess called with:", data);
       queryClient.invalidateQueries({ queryKey: ["workout-log"] });
     },
     onError: (error) => {
