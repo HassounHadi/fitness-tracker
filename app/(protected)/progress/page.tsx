@@ -114,7 +114,7 @@ export default function ProgressPage() {
         {/* Total Progress Logs */}
         <StatCard
           title="Progress Entries"
-          value={allProgress.length?.toString()}
+          value={allProgress?.length?.toString()}
           description={
             allProgress.length > 0
               ? `Last logged: ${new Date(
