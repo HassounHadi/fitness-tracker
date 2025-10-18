@@ -26,8 +26,10 @@ export default function ProgressPage() {
     // Get second latest for comparison
     const previousProgress = allProgress[1];
 
-    let weightTrend: { value: number; isPositive: boolean } | undefined = undefined;
-    let bodyFatTrend: { value: number; isPositive: boolean } | undefined = undefined;
+    let weightTrend: { value: number; isPositive: boolean } | undefined =
+      undefined;
+    let bodyFatTrend: { value: number; isPositive: boolean } | undefined =
+      undefined;
 
     if (latestProgress.weight && previousProgress?.weight) {
       const diff = latestProgress.weight - previousProgress.weight;
@@ -54,7 +56,8 @@ export default function ProgressPage() {
   }, [latestProgress, allProgress]);
 
   // User's target weight from profile
-  const targetWeight = (session?.user as { targetWeight?: number })?.targetWeight;
+  const targetWeight = (session?.user as { targetWeight?: number })
+    ?.targetWeight;
 
   return (
     <div className="flex flex-col gap-10">
@@ -111,10 +114,12 @@ export default function ProgressPage() {
         {/* Total Progress Logs */}
         <StatCard
           title="Progress Entries"
-          value={allProgress.length.toString()}
+          value={allProgress.length?.toString()}
           description={
             allProgress.length > 0
-              ? `Last logged: ${new Date(allProgress[0]?.date).toLocaleDateString()}`
+              ? `Last logged: ${new Date(
+                  allProgress[0]?.date
+                ).toLocaleDateString()}`
               : "Start logging progress"
           }
           icon={Dumbbell}
