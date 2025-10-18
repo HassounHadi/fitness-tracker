@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     // Check if workout already started
     if (scheduledWorkout.workoutLogId) {
-      // Return existing workout log
+      // Return existing workout log with exercises
       const existingLog = await prisma.workoutLog.findUnique({
         where: { id: scheduledWorkout.workoutLogId },
         include: {
@@ -77,31 +77,30 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      return NextResponse.json(existingLog);
+      // Return the log with template exercises info for the UI
+      return NextResponse.json({
+        success: true,
+        message: "Workout already started",
+        data: {
+          ...existingLog,
+          templateExercises: scheduledWorkout.template.exercises.map((ex) => ({
+            exerciseId: ex.exerciseId,
+            exercise: ex.exercise,
+            sets: ex.sets,
+            reps: ex.reps,
+            notes: ex.notes,
+          })),
+        },
+      });
     }
 
-    // Create a new workout log with exercises and sets
+    // Create a new workout log WITHOUT exercises (incremental approach)
     const workoutLog = await prisma.workoutLog.create({
       data: {
         userId: session.user.id,
         templateId: scheduledWorkout.templateId,
         name: scheduledWorkout.template.name,
         date: scheduledWorkout.scheduledDate,
-        exercises: {
-          create: scheduledWorkout.template.exercises.map((templateEx, index) => ({
-            exerciseId: templateEx.exerciseId,
-            order: index,
-            notes: templateEx.notes,
-            sets: {
-              create: Array.from({ length: templateEx.sets }, (_, setIndex) => ({
-                setNumber: setIndex + 1,
-                reps: 0, // Will be filled in as user logs
-                weight: null,
-                completed: false,
-              })),
-            },
-          })),
-        },
       },
       include: {
         exercises: {
@@ -128,7 +127,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(workoutLog);
+    // Return the log with template exercises for the UI to know what to log
+    return NextResponse.json({
+      success: true,
+      message: "Workout started successfully",
+      data: {
+        ...workoutLog,
+        templateExercises: scheduledWorkout.template.exercises.map((ex) => ({
+          exerciseId: ex.exerciseId,
+          exercise: ex.exercise,
+          sets: ex.sets,
+          reps: ex.reps,
+          notes: ex.notes,
+        })),
+      },
+    });
   } catch (error) {
     console.error("Error starting workout:", error);
 
@@ -139,8 +152,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Return detailed error message for debugging
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
+    console.error("Detailed error:", {
+      message: errorMessage,
+      stack: errorStack,
+      error: error,
+    });
+
     return NextResponse.json(
-      { error: "Failed to start workout" },
+      {
+        error: "Failed to start workout",
+        message: errorMessage,
+        details: process.env.NODE_ENV === "development" ? errorStack : undefined
+      },
       { status: 500 }
     );
   }
