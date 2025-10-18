@@ -34,6 +34,7 @@ export function WeekCalendar({
   workouts,
   currentWeekStart,
   onWeekChange,
+  isLoading,
 }: WeekCalendarProps) {
   const weekDays = Array.from({ length: 7 }, (_, i) =>
     addDays(currentWeekStart, i)
@@ -81,45 +82,60 @@ export function WeekCalendar({
       </CardHeader>
 
       <CardContent className="overflow-x-auto">
-        <div className="flex gap-2 w-max">
-          {weekDays.map((day) => {
-            const workout = getWorkoutForDay(day);
-            const isToday = isSameDay(day, new Date());
-            const isSelected = isSameDay(day, selectedDay);
-
-            return (
-              <button
-                key={day.toISOString()}
-                onClick={() => onSelectDay(day)}
-                className={`
-            flex-shrink-0 w-20 p-2 rounded-lg border-2 transition-all
-            ${
-              isSelected
-                ? "border-accent bg-accent/10"
-                : "border-border hover:border-accent/50"
-            }
-            ${isToday && !isSelected ? "ring-2 ring-accent/30" : ""}
-          `}
+        {isLoading ? (
+          <div className="flex gap-2 w-max">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 w-20 p-2 rounded-lg border-2 border-border"
               >
-                <p className="text-xs text-accent text-center">
-                  {format(day, "EEE")}
-                </p>
-                <p className="text-2xl font-bold text-center">
-                  {format(day, "d")}
-                </p>
-                <div className="mt-2 flex justify-center">
-                  {workout ? (
-                    <span className="text-[10px] px-1.5 py-0 bg-primary/10 rounded">
-                      {workout.name}
-                    </span>
-                  ) : (
-                    <Dumbbell className="h-6 w-6 text-muted-foreground/30" />
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                <div className="h-4 bg-muted animate-pulse rounded mb-2" />
+                <div className="h-8 bg-muted animate-pulse rounded mb-2" />
+                <div className="h-6 bg-muted animate-pulse rounded" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex gap-2 w-max">
+            {weekDays.map((day) => {
+              const workout = getWorkoutForDay(day);
+              const isToday = isSameDay(day, new Date());
+              const isSelected = isSameDay(day, selectedDay);
+
+              return (
+                <button
+                  key={day.toISOString()}
+                  onClick={() => onSelectDay(day)}
+                  className={`
+              flex-shrink-0 w-20 p-2 rounded-lg border-2 transition-all
+              ${
+                isSelected
+                  ? "border-accent bg-accent/10"
+                  : "border-border hover:border-accent/50"
+              }
+              ${isToday && !isSelected ? "ring-2 ring-accent/30" : ""}
+            `}
+                >
+                  <p className="text-xs text-accent text-center">
+                    {format(day, "EEE")}
+                  </p>
+                  <p className="text-2xl font-bold text-center">
+                    {format(day, "d")}
+                  </p>
+                  <div className="mt-2 flex justify-center">
+                    {workout ? (
+                      <span className="text-[10px] px-1.5 py-0 bg-primary/10 rounded">
+                        {workout.name}
+                      </span>
+                    ) : (
+                      <Dumbbell className="h-6 w-6 text-muted-foreground/30" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -1,7 +1,11 @@
 "use client";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 
 export default function CTAAndFooter() {
+  const { data: session } = useSession();
+
   return (
     <>
       {/* === Call to Action Section === */}
@@ -17,7 +21,11 @@ export default function CTAAndFooter() {
             tracking, AI coaching, and progress insights.
           </p>
 
-          <Button size={"lg"}>Get Started</Button>
+          {!session && (
+            <Link href="/signup">
+              <Button size={"lg"}>Get Started</Button>
+            </Link>
+          )}
         </div>
 
         {/* Decorative elements */}

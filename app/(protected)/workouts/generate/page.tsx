@@ -230,6 +230,9 @@ export default function GenerateWorkoutPage() {
           });
 
           toast.success("Workout generated successfully!");
+
+          // Switch to workout tab on mobile to show the generated workout
+          setMobileView("workout");
         },
         onError: (err: Error) => {
           console.error("❌ Error generating workout:", err);

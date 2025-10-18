@@ -83,6 +83,7 @@ export default function WeekCalendarPage() {
             workout={selectedWorkout}
             selectedDay={selectedDay}
             onAddWorkout={handleAddWorkout}
+            isLoading={isLoading}
           />
         </div>
       </div>

@@ -1,6 +1,12 @@
+"use client";
+
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 
 export default function Hero() {
+  const { data: session } = useSession();
+
   return (
     <section
       className="relative flex flex-col items-center justify-center px-6 md:px-16 pt-32 pb-20 overflow-hidden bg-cover bg-center bg-no-repeat min-h-[70vh]"
@@ -23,9 +29,13 @@ export default function Hero() {
           one place.
         </p>
 
-        <div className="flex justify-center md:justify-end mt-6">
-          <Button>Get Started</Button>
-        </div>
+        {!session && (
+          <div className="flex justify-center md:justify-end mt-6">
+            <Link href="/signup">
+              <Button>Get Started</Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Decorative shapes */}

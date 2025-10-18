@@ -27,9 +27,10 @@ interface WorkoutDetailsProps {
   workout: Workout | undefined;
   selectedDay: Date;
   onAddWorkout: () => void;
+  isLoading?: boolean;
 }
 
-export function WorkoutDetails({ workout, selectedDay, onAddWorkout }: WorkoutDetailsProps) {
+export function WorkoutDetails({ workout, selectedDay, onAddWorkout, isLoading }: WorkoutDetailsProps) {
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -39,7 +40,13 @@ export function WorkoutDetails({ workout, selectedDay, onAddWorkout }: WorkoutDe
       </CardHeader>
 
       <CardContent className="flex flex-col gap-2">
-        {!workout ? (
+        {isLoading ? (
+          <div className="flex flex-col gap-3 py-6">
+            <div className="h-4 bg-muted animate-pulse rounded" />
+            <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+            <div className="h-4 bg-muted animate-pulse rounded w-1/2" />
+          </div>
+        ) : !workout ? (
           <div className="flex flex-col items-center justify-center py-6 text-center">
             <Dumbbell className="h-16 w-16 text-muted-foreground mb-4" />
             <p className="text-primary mb-2">No workout scheduled</p>
