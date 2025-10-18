@@ -1,3 +1,7 @@
+## MUST DO
+
+Run `pnpm install` to add all dependencies
+
 ## 🚀 Features Overview
 
 This fitness tracker web app provides a complete end-to-end experience for managing workouts, tracking nutrition, and visualizing fitness progress — all in one intuitive dashboard.
