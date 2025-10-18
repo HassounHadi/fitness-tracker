@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay } from "date-fns";
 
 // Validation schema for scheduling a workout
 const scheduleWorkoutSchema = z.object({
@@ -65,12 +65,12 @@ export async function GET(req: NextRequest) {
       success: true,
       data: scheduledWorkouts,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching scheduled workouts:", error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to fetch scheduled workouts",
+        message: error instanceof Error ? error.message : "Failed to fetch scheduled workouts",
       },
       { status: 500 }
     );
@@ -169,12 +169,12 @@ export async function POST(req: NextRequest) {
       data: scheduledWorkout,
       message: "Workout scheduled successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error scheduling workout:", error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to schedule workout",
+        message: error instanceof Error ? error.message : "Failed to schedule workout",
       },
       { status: 500 }
     );
@@ -226,12 +226,12 @@ export async function DELETE(req: NextRequest) {
       success: true,
       message: "Scheduled workout removed successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error deleting scheduled workout:", error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to delete scheduled workout",
+        message: error instanceof Error ? error.message : "Failed to delete scheduled workout",
       },
       { status: 500 }
     );

@@ -77,12 +77,12 @@ Do not include any markdown, explanations, or text outside the JSON object.
       data: workoutPlan,
       message: "Workout generated successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Gemini workout generation error:", error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to generate workout plan",
+        message: error instanceof Error ? error.message : "Failed to generate workout plan",
       },
       { status: 500 }
     );

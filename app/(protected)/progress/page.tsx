@@ -2,23 +2,22 @@
 
 import { StatCard } from "@/components/progress/stat-card";
 import { ProgressLogDialog } from "@/components/progress/progress-log-dialog";
-import { Dumbbell, Flame, Target, TrendingDown, TrendingUp, Activity } from "lucide-react";
+import { Dumbbell, Target, Activity } from "lucide-react";
 import { useLatestProgress, useProgressLogs } from "@/hooks/use-progress";
 import { useSession } from "next-auth/react";
-import { startOfWeek, endOfWeek, subDays } from "date-fns";
 import { useMemo } from "react";
 
 export default function ProgressPage() {
   const { data: session } = useSession();
-  const { data: latestProgress, isLoading: latestLoading } = useLatestProgress();
+  const { data: latestProgress } = useLatestProgress();
   const { data: allProgress = [] } = useProgressLogs();
 
   // Calculate progress trends
   const progressStats = useMemo(() => {
     if (!latestProgress || allProgress.length < 2) {
       return {
-        weightTrend: null,
-        bodyFatTrend: null,
+        weightTrend: undefined,
+        bodyFatTrend: undefined,
         previousWeight: null,
         previousBodyFat: null,
       };
@@ -27,8 +26,8 @@ export default function ProgressPage() {
     // Get second latest for comparison
     const previousProgress = allProgress[1];
 
-    let weightTrend = null;
-    let bodyFatTrend = null;
+    let weightTrend: { value: number; isPositive: boolean } | undefined = undefined;
+    let bodyFatTrend: { value: number; isPositive: boolean } | undefined = undefined;
 
     if (latestProgress.weight && previousProgress?.weight) {
       const diff = latestProgress.weight - previousProgress.weight;
@@ -55,7 +54,7 @@ export default function ProgressPage() {
   }, [latestProgress, allProgress]);
 
   // User's target weight from profile
-  const targetWeight = session?.user?.targetWeight;
+  const targetWeight = (session?.user as { targetWeight?: number })?.targetWeight;
 
   return (
     <div className="flex flex-col gap-10">

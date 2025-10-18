@@ -40,9 +40,24 @@ export async function POST(req: Request) {
       );
     }
 
+    interface NutritionixFood {
+      food_name: string;
+      nf_calories?: number;
+      nf_protein?: number;
+      nf_total_carbohydrate?: number;
+      nf_total_fat?: number;
+    }
+
+    interface NutritionTotals {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    }
+
     // Compute totals
-    const totals = data.foods.reduce(
-      (acc: any, food: any) => {
+    const totals: NutritionTotals = data.foods.reduce(
+      (acc: NutritionTotals, food: NutritionixFood) => {
         acc.calories += food.nf_calories || 0;
         acc.protein += food.nf_protein || 0;
         acc.carbs += food.nf_total_carbohydrate || 0;
@@ -81,7 +96,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       totals,
-      foods: data.foods.map((f: any) => ({
+      foods: data.foods.map((f: NutritionixFood) => ({
         name: f.food_name,
         calories: f.nf_calories,
         protein: f.nf_protein,

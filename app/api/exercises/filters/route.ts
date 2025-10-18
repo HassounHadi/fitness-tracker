@@ -32,11 +32,11 @@ export async function GET() {
       },
       message: "Filters fetched successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to fetch filters",
+        message: error instanceof Error ? error.message : "Failed to fetch filters",
       },
       { status: 500 }
     );

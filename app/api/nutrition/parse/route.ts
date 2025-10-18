@@ -50,8 +50,30 @@ export async function POST(req: NextRequest) {
 
     const data = await nutritionixResponse.json();
 
+    interface NutritionixFood {
+      food_name: string;
+      serving_qty: number;
+      serving_unit: string;
+      nf_calories: number;
+      nf_protein: number;
+      nf_total_carbohydrate: number;
+      nf_total_fat: number;
+      photo?: { thumb?: string };
+    }
+
+    interface ParsedFood {
+      name: string;
+      servingQty: number;
+      servingUnit: string;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      photo: string | null;
+    }
+
     // Extract foods and calculate totals
-    const foods = data.foods.map((food: any) => ({
+    const foods: ParsedFood[] = data.foods.map((food: NutritionixFood) => ({
       name: food.food_name,
       servingQty: food.serving_qty,
       servingUnit: food.serving_unit,
@@ -64,7 +86,7 @@ export async function POST(req: NextRequest) {
 
     // Calculate totals
     const totals = foods.reduce(
-      (acc: any, food: any) => ({
+      (acc, food) => ({
         calories: acc.calories + food.calories,
         protein: acc.protein + food.protein,
         carbs: acc.carbs + food.carbs,
@@ -83,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
+        { error: "Invalid request data", details: error.issues },
         { status: 400 }
       );
     }

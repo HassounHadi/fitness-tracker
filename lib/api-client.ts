@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
 // Standard API Response Type
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
   data?: T;
@@ -18,7 +18,7 @@ interface ApiClientOptions extends RequestInit {
  * Centralized API client with automatic toast handling
  * Maps HTTP status codes to appropriate toast variants
  */
-export async function apiClient<T = any>(
+export async function apiClient<T = unknown>(
   url: string,
   options: ApiClientOptions = {}
 ): Promise<ApiResponse<T>> {
@@ -55,10 +55,11 @@ export async function apiClient<T = any>(
       data: data.data,
       statusCode: response.status,
     };
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Network error occurred";
     const errorResponse: ApiResponse<T> = {
       success: false,
-      message: error.message || "Network error occurred",
+      message: errorMessage,
       statusCode: 0,
     };
 
@@ -72,27 +73,27 @@ export async function apiClient<T = any>(
 
 // Convenience methods
 export const api = {
-  get: <T = any>(url: string, options?: ApiClientOptions) =>
+  get: <T = unknown>(url: string, options?: ApiClientOptions) =>
     apiClient<T>(url, { ...options, method: "GET" }),
 
-  post: <T = any>(url: string, body?: any, options?: ApiClientOptions) =>
+  post: <T = unknown>(url: string, body?: unknown, options?: ApiClientOptions) =>
     apiClient<T>(url, {
       ...options,
       method: "POST",
       body: JSON.stringify(body),
     }),
 
-  put: <T = any>(url: string, body?: any, options?: ApiClientOptions) =>
+  put: <T = unknown>(url: string, body?: unknown, options?: ApiClientOptions) =>
     apiClient<T>(url, {
       ...options,
       method: "PUT",
       body: JSON.stringify(body),
     }),
 
-  delete: <T = any>(url: string, options?: ApiClientOptions) =>
+  delete: <T = unknown>(url: string, options?: ApiClientOptions) =>
     apiClient<T>(url, { ...options, method: "DELETE" }),
 
-  patch: <T = any>(url: string, body?: any, options?: ApiClientOptions) =>
+  patch: <T = unknown>(url: string, body?: unknown, options?: ApiClientOptions) =>
     apiClient<T>(url, {
       ...options,
       method: "PATCH",

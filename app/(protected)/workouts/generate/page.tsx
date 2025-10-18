@@ -181,7 +181,7 @@ export default function GenerateWorkoutPage() {
 
       // Clear the workout builder on success
       clearWorkout();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to save workout:", error);
       // Error toast is already shown by the mutation
     }
@@ -231,7 +231,7 @@ export default function GenerateWorkoutPage() {
 
           toast.success("Workout generated successfully!");
         },
-        onError: (err: any) => {
+        onError: (err: Error) => {
           console.error("❌ Error generating workout:", err);
           toast.error(err.message || "Failed to generate workout");
         },
@@ -257,7 +257,7 @@ export default function GenerateWorkoutPage() {
       <div className="lg:hidden flex-1 flex flex-col overflow-hidden">
         <Tabs
           value={mobileView}
-          onValueChange={(v) => setMobileView(v as any)}
+          onValueChange={(v) => setMobileView(v as "exercises" | "workout" | "ai")}
           className="flex flex-col h-full"
         >
           <TabsList className="grid w-full grid-cols-3 flex-shrink-0">

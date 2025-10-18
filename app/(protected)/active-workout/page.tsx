@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Dialog,
@@ -13,15 +13,28 @@ import { Button } from "@/components/ui/button";
 import { ExerciseFormItem } from "@/components/exercises/exercise-form-item";
 import { ExerciseDetailsDisplay } from "@/components/exercises/exercise-details-display";
 import { SectionHeader } from "@/components/common/section-header";
-import Link from "next/link";
 import {
   useStartWorkout,
   useUpdateSet,
   useCompleteWorkout,
   type WorkoutLog,
-  type LoggedExercise,
 } from "@/hooks/use-workout-log";
 import { Loader2 } from "lucide-react";
+
+// Type for Exercise from WorkoutLog
+interface Exercise {
+  id: string;
+  name: string;
+  target: string;
+  apiId: string;
+  gifUrl: string;
+  bodyPart: string;
+  equipment: string;
+  secondaryMuscles: string[];
+  instructions: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // -------------------- Active Workout Page --------------------
 export default function ActiveWorkoutPage() {
@@ -211,7 +224,7 @@ export default function ActiveWorkoutPage() {
 
         <ExerciseFormItem
           data={{
-            exercise: currentExercise.exercise as any,
+            exercise: currentExercise.exercise as Exercise,
             sets: currentExercise.sets.length,
             reps: 0, // We'll show actual reps in the dialog
             restTime: 60, // Default rest time
@@ -297,7 +310,7 @@ export default function ActiveWorkoutPage() {
         <div className="mt-4 space-y-2">
           <h3 className="t5 font-semibold">Completed Sets</h3>
           <div className="space-y-1">
-            {workoutLog.exercises.map((ex, exIdx) => {
+            {workoutLog.exercises.map((ex) => {
               const completedSetsForEx = ex.sets.filter((s) => s.completed);
               if (completedSetsForEx.length === 0) return null;
 
@@ -320,7 +333,7 @@ export default function ActiveWorkoutPage() {
       {/* Right Column - Details */}
       <div className="md:w-1/2 space-y-4">
         <ExerciseDetailsDisplay
-          exercise={currentExercise.exercise as any}
+          exercise={currentExercise.exercise as Exercise}
           showImage={true}
           imageClassName="h-48 md:h-64 rounded-md"
         />

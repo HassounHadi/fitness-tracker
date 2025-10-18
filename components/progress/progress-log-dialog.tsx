@@ -85,7 +85,16 @@ export function ProgressLogDialog() {
   });
 
   const onSubmit = async (data: ProgressFormValues) => {
-    const payload: any = {};
+    const payload: {
+      weight?: number;
+      bodyFat?: number;
+      chest?: number;
+      waist?: number;
+      hips?: number;
+      biceps?: number;
+      thighs?: number;
+      notes?: string;
+    } = {};
 
     if (data.weight) payload.weight = Number(data.weight);
     if (data.bodyFat) payload.bodyFat = Number(data.bodyFat);

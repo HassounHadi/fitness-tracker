@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { startOfDay, endOfDay } from "date-fns";
+import { Prisma } from "@prisma/client";
 
 const createProgressSchema = z.object({
   date: z.string().optional(),
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest) {
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
 
-    const whereClause: any = {
+    const whereClause: Prisma.ProgressLogWhereInput = {
       userId: session.user.id,
     };
 
@@ -137,7 +138,7 @@ export async function POST(req: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
+        { error: "Invalid request data", details: error.issues },
         { status: 400 }
       );
     }

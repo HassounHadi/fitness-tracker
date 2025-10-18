@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useWorkouts } from "@/hooks/use-workouts";
 import { useScheduleWorkout } from "@/hooks/use-scheduled-workouts";
-import { WorkoutGrid } from "@/components/workouts/workout-grid";
 import { LoadingState } from "@/components/common/loading-state";
 import { Dumbbell, Sparkles } from "lucide-react";
 import { format } from "date-fns";

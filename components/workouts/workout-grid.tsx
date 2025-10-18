@@ -28,7 +28,7 @@ export function WorkoutGrid({
         >
           <WorkoutCard
             workout={workout}
-            onView={selectable ? () => handleClick(workout.id) : undefined}
+            onView={(id: string) => handleClick(id)}
           />
         </div>
       ))}

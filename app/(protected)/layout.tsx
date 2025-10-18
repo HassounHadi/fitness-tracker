@@ -2,7 +2,7 @@
 import { ReactNode } from "react";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import Navbar from "@/components/navbar-04/navbar-04";
 import { WorkoutBuilderProvider } from "@/contexts/workout-builder-context";
 import { WorkoutBuilderSidebar } from "@/components/workouts/workout-builder-sidebar";

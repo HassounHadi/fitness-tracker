@@ -233,7 +233,7 @@ export default function OnboardingPage() {
             className="space-y-6"
           >
             <div className="space-y-3">
-              <Label>What's your primary fitness goal?</Label>
+              <Label>What&apos;s your primary fitness goal?</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {fitnessGoals.map((goal) => (
                   <label
@@ -262,7 +262,7 @@ export default function OnboardingPage() {
             </div>
 
             <div className="space-y-3">
-              <Label>What's your fitness level?</Label>
+              <Label>What&apos;s your fitness level?</Label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {fitnessLevels.map((level) => (
                   <label

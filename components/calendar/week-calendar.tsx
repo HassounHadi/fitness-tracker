@@ -34,7 +34,6 @@ export function WeekCalendar({
   workouts,
   currentWeekStart,
   onWeekChange,
-  isLoading,
 }: WeekCalendarProps) {
   const weekDays = Array.from({ length: 7 }, (_, i) =>
     addDays(currentWeekStart, i)

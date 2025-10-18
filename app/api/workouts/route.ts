@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -82,19 +82,19 @@ export async function POST(request: NextRequest) {
       data: workout,
       message: "Workout created successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating workout:", error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to create workout",
+        message: error instanceof Error ? error.message : "Failed to create workout",
       },
       { status: 500 }
     );
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -129,11 +129,11 @@ export async function GET(req: NextRequest) {
       data: workouts,
       message: "Workouts fetched successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to fetch workouts",
+        message: error instanceof Error ? error.message : "Failed to fetch workouts",
       },
       { status: 500 }
     );

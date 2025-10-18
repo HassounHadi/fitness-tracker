@@ -32,7 +32,6 @@ export function ExerciseFormItem({
   onUpdate,
   onRemove,
   showImage = true,
-  compact = false,
 }: ExerciseFormItemProps) {
   const { exercise, sets, reps, restTime, notes } = data;
 

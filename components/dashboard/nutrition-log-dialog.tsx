@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 
 import {
   Dialog,
@@ -128,7 +127,7 @@ export function NutritionLogDialog() {
         <DialogHeader>
           <DialogTitle>Log Meal</DialogTitle>
           <DialogDescription>
-            Describe what you ate and we'll analyze the nutrition
+            Describe what you ate and we&apos;ll analyze the nutrition
           </DialogDescription>
         </DialogHeader>
 

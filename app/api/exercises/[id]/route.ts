@@ -27,11 +27,11 @@ export async function GET(
       data: exercise,
       message: "Exercise fetched successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to fetch exercise",
+        message: error instanceof Error ? error.message : "Failed to fetch exercise",
       },
       { status: 500 }
     );

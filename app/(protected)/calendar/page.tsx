@@ -39,7 +39,7 @@ export default function WeekCalendarPage() {
         0
       ),
       exercises: sw.template.exercises.map(
-        (ex: { exercise: { name: any }; sets: any; reps: any }) => ({
+        (ex: { exercise: { name: string }; sets: number; reps: number }) => ({
           name: ex.exercise.name,
           sets: ex.sets,
           reps: ex.reps,

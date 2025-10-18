@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
     const target = searchParams.get("target");
 
     // Build where clause based on filters
-    const where: any = {};
+    const where: Prisma.ExerciseWhereInput = {};
 
     if (search) {
       // Normalize search: remove extra spaces, handle hyphens and spaces
@@ -64,11 +65,11 @@ export async function GET(req: NextRequest) {
       data: exercises,
       message: "Exercises fetched successfully",
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to fetch exercises",
+        message: error instanceof Error ? error.message : "Failed to fetch exercises",
       },
       { status: 500 }
     );

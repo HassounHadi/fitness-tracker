@@ -12,13 +12,13 @@ export const Logo = () => (
       >
         <path
           d="M2 16 L8 16 L10 12 L14 20 L18 10 L22 16 L30 16"
-          stroke="#10b981" // Primary Blue
+          stroke="#10b981"
           strokeWidth="2"
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle cx="30" cy="16" r="2" fill="#F59E0B" /> // Accent Amber
+        <circle cx="30" cy="16" r="2" fill="#F59E0B" />
       </svg>
 
       <span
