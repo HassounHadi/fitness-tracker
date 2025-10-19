@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { nutritionixDailyLimit, checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 
 const parseNutritionSchema = z.object({
@@ -11,6 +12,7 @@ const parseNutritionSchema = z.object({
  * POST /api/nutrition/parse
  * Parses natural language food description using Nutritionix API
  * Returns nutritional information for the foods described
+ * Rate limited to 500 requests/day
  */
 export async function POST(req: NextRequest) {
   try {
@@ -18,6 +20,14 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+
+    // Check daily rate limit (500 requests/day)
+    const rateLimitCheck = await checkRateLimit(nutritionixDailyLimit, userId, "Nutritionix API");
+    if (!rateLimitCheck.allowed) {
+      return rateLimitCheck.response!;
     }
 
     const body = await req.json();
@@ -95,11 +105,19 @@ export async function POST(req: NextRequest) {
       { calories: 0, protein: 0, carbs: 0, fat: 0 }
     );
 
-    return NextResponse.json({
-      foods,
-      totals,
-      originalQuery: query,
-    });
+    return NextResponse.json(
+      {
+        foods,
+        totals,
+        originalQuery: query,
+        rateLimit: {
+          dailyRemaining: rateLimitCheck.headers["X-RateLimit-Remaining"],
+        },
+      },
+      {
+        headers: rateLimitCheck.headers,
+      }
+    );
   } catch (error) {
     console.error("Error parsing nutrition:", error);
 

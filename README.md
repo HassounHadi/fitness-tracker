@@ -290,4 +290,177 @@ The Progress Page includes **5 comprehensive charts** built with Recharts that p
   - `/api/progress` → Fetches body measurement history
 
 ---
+
+## 🔒 Security & Rate Limiting
+
+This application implements comprehensive security measures to protect both user data and API resources.
+
+### 🛡️ Security Headers
+
+All API routes are protected with industry-standard security headers implemented through Next.js middleware:
+
+- **Strict-Transport-Security**: Enforces HTTPS connections (HSTS with 2-year max-age)
+- **X-Frame-Options**: Prevents clickjacking attacks (SAMEORIGIN)
+- **X-Content-Type-Options**: Prevents MIME-sniffing vulnerabilities (nosniff)
+- **X-XSS-Protection**: Enables browser XSS filtering
+- **Referrer-Policy**: Controls referrer information sharing (strict-origin-when-cross-origin)
+- **Permissions-Policy**: Restricts access to sensitive browser features (camera, microphone, geolocation)
+- **X-DNS-Prefetch-Control**: Optimizes DNS prefetching for performance
+
+These headers are automatically applied to all routes via `middleware.ts`.
+
+### 🔐 API Authentication
+
+All protected API endpoints are secured using **JWT (JSON Web Token) authentication** with automatic token verification via middleware.
+
+#### Authentication Flow
+
+1. **User Login**: Users authenticate via NextAuth (Google OAuth or Credentials)
+2. **JWT Generation**: Upon successful login, the server generates:
+   - **Access Token** (15 minutes expiry) - For API requests
+   - **Refresh Token** (7 days expiry) - For renewing access tokens
+3. **Token Storage**: Tokens are stored in the NextAuth session
+4. **Automatic Token Injection**: The API client (`lib/api-client.ts`) automatically attaches the JWT token to all requests:
+   ```
+   Authorization: Bearer <access_token>
+   ```
+5. **Middleware Verification**: All `/api/*` requests pass through middleware (`middleware.ts`) that:
+   - Extracts the JWT token from the `Authorization` header
+   - Verifies the token signature and expiration
+   - Returns **401 Unauthorized** if token is missing/invalid
+   - Attaches user info (`x-user-id`, `x-user-email`) to request headers for routes to access
+
+#### Benefits of This Approach
+
+- **Centralized Authentication**: No need to check auth in every route manually
+- **Automatic 401 Responses**: Middleware handles all unauthorized requests
+- **Stateless**: JWTs are self-contained (no server-side session storage needed)
+- **Scalable**: Works across multiple servers/instances
+- **Secure**: Tokens are signed and verified using secret keys (HS256 algorithm)
+
+#### For Developers
+
+**Client-Side (Frontend)**:
+- Use the `api` client from `lib/api-client.ts` for all API requests
+- JWT tokens are automatically included in headers
+- No manual token handling required
+- Example:
+  ```typescript
+  import { api } from "@/lib/api-client";
+
+  const response = await api.post("/api/workouts", { name: "Leg Day" });
+  ```
+
+**Server-Side (API Routes)**:
+- Middleware handles all authentication automatically
+- Access user info using the helper function from `lib/get-user.ts`:
+  ```typescript
+  import { getUserId } from "@/lib/get-user";
+
+  const userId = await getUserId(); // Returns user ID from JWT
+  ```
+- No need to manually check `getServerSession()` or verify tokens in routes
+
+#### Public Routes
+
+These routes bypass JWT authentication:
+- `/api/auth/*` - NextAuth endpoints (login, callback, etc.)
+- `/api/exercises/*` - Public exercise library
+- `/login`, `/signup`, `/onboarding` - Authentication pages
+
+#### Protected Endpoints
+
+All other API endpoints require valid JWT tokens:
+- `/api/nutrition/*` - Nutrition logging and parsing
+- `/api/progress` - Body measurements and progress tracking
+- `/api/workouts` - Workout templates and management
+- `/api/workout-logs/*` - Active workout tracking
+- `/api/scheduled-workouts` - Workout calendar scheduling
+- `/api/gemini/workout-generator` - AI workout generation
+- `/api/user/onboarding` - User profile setup
+- `/api/workout-stats` - Workout analytics
+
+### ⏱️ Rate Limiting
+
+The application implements intelligent rate limiting to protect third-party API resources and prevent abuse.
+
+#### Gemini AI API Limits
+- **Per-Minute Limit**: 15 requests/minute
+- **Daily Limit**: 1,500 requests/day
+- **Endpoint**: `/api/gemini/workout-generator`
+- **Usage**: AI workout generation
+
+#### Nutritionix API Limits
+- **Daily Limit**: 500 requests/day
+- **Endpoint**: `/api/nutrition/parse`
+- **Usage**: Natural language meal parsing and nutritional analysis
+
+#### Rate Limit Implementation
+
+Rate limiting is implemented using an in-memory store with automatic cleanup:
+
+```typescript
+// lib/rate-limit.ts
+- Tracks requests per user ID
+- Automatically resets when time window expires
+- Periodic cleanup every hour to prevent memory leaks
+- Returns standard HTTP 429 status when limit exceeded
+```
+
+#### Rate Limit Headers
+
+All rate-limited endpoints return standard headers:
+- `X-RateLimit-Limit` - Maximum requests allowed
+- `X-RateLimit-Remaining` - Requests remaining in current window
+- `X-RateLimit-Reset` - Timestamp when limit resets
+- `Retry-After` - Seconds to wait before retrying (on 429 errors)
+
+#### User Feedback
+
+The application provides proactive user feedback about rate limits:
+
+1. **Warning Notifications** (80% usage):
+   - Toast warning appears when user reaches 80% of their rate limit
+   - Shows remaining requests and reset time
+   - Example: "Rate limit warning: 3 of 15 requests remaining. Resets at 2:30 PM."
+
+2. **Rate Limit Exceeded** (100% usage):
+   - Clear error message with retry information
+   - Shows exact wait time before next request allowed
+   - Example: "Rate limit exceeded. Please try again in 45 seconds."
+
+3. **Response Body Information**:
+   - Successful API responses include `rateLimit` object with remaining requests
+   - Allows frontend to display usage information in UI
+
+### 🔍 Security Best Practices
+
+Additional security measures implemented:
+
+- **Input Validation**: All endpoints use Zod schemas for request validation
+- **Environment Variables**: Sensitive API keys stored securely in `.env`
+- **Error Handling**: Generic error messages prevent information leakage
+- **Database Queries**: Prisma ORM prevents SQL injection
+- **CORS Protection**: Next.js default CORS policy restricts cross-origin requests
+- **Data Ownership**: All database queries filter by authenticated user ID
+
+### 📊 Monitoring Rate Limits
+
+Users can monitor their API usage through:
+
+1. **Response Headers**: Check browser DevTools Network tab for rate limit headers
+2. **Toast Notifications**: Automatic warnings when approaching limits
+3. **Error Messages**: Clear feedback when limits are exceeded
+
+### 🚀 Production Considerations
+
+For production deployments, consider:
+
+- Upgrading to Redis-backed rate limiting for multi-server scalability (currently using in-memory)
+- Implementing distributed rate limiting if running multiple instances
+- Monitoring rate limit usage patterns to optimize limits
+- Setting up alerts for repeated rate limit violations
+- Implementing IP-based rate limiting for additional protection
+
+---
 ```

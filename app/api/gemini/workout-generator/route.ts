@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { generateAIContent } from "@/lib/ai";
+import { geminiMinuteLimit, geminiDailyLimit, checkRateLimit } from "@/lib/rate-limit";
 
 interface ExerciseReference {
   id: string;
@@ -16,6 +19,29 @@ interface WorkoutRequest {
 
 export async function POST(req: Request) {
   try {
+    // Authentication check
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+
+    // Check minute rate limit (15 requests/minute)
+    const minuteCheck = await checkRateLimit(geminiMinuteLimit, userId, "Gemini AI (per minute)");
+    if (!minuteCheck.allowed) {
+      return minuteCheck.response!;
+    }
+
+    // Check daily rate limit (1500 requests/day)
+    const dailyCheck = await checkRateLimit(geminiDailyLimit, userId, "Gemini AI (daily)");
+    if (!dailyCheck.allowed) {
+      return dailyCheck.response!;
+    }
+
     const body: WorkoutRequest = await req.json();
     const { goal, duration, targetMuscles, instructions, exercises } = body;
 
@@ -72,11 +98,23 @@ Do not include any markdown, explanations, or text outside the JSON object.
     // Parse the JSON response
     const workoutPlan = JSON.parse(cleanedText);
 
-    return NextResponse.json({
-      success: true,
-      data: workoutPlan,
-      message: "Workout generated successfully",
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: workoutPlan,
+        message: "Workout generated successfully",
+        rateLimit: {
+          minuteRemaining: minuteCheck.headers["X-RateLimit-Remaining"],
+          dailyRemaining: dailyCheck.headers["X-RateLimit-Remaining"],
+        },
+      },
+      {
+        headers: {
+          ...minuteCheck.headers,
+          "X-RateLimit-Daily-Remaining": dailyCheck.headers["X-RateLimit-Remaining"],
+        },
+      }
+    );
   } catch (error) {
     console.error("Gemini workout generation error:", error);
     return NextResponse.json(
