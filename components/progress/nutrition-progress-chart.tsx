@@ -36,7 +36,7 @@ export function NutritionProgressChart({
   goals,
 }: NutritionProgressChartProps) {
   // Group nutrition logs by date and sum the macros
-  const dailyNutrition = data.reduce((acc, entry) => {
+  const dailyNutrition = data?.reduce((acc, entry) => {
     const dateKey = format(new Date(entry.date), "yyyy-MM-dd");
     if (!acc[dateKey]) {
       acc[dateKey] = {
