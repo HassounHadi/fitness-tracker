@@ -30,15 +30,24 @@ export async function POST(req: Request) {
 
     const userId = session.user.id;
 
+    // Debug logging
+    console.log("🔍 Rate limit check for user:", userId);
+
     // Check minute rate limit (15 requests/minute)
     const minuteCheck = await checkRateLimit(geminiMinuteLimit, userId, "Gemini AI (per minute)");
+    console.log("⏱️ Minute limit check:", minuteCheck);
+
     if (!minuteCheck.allowed) {
+      console.log("🚫 MINUTE RATE LIMIT EXCEEDED");
       return minuteCheck.response!;
     }
 
     // Check daily rate limit (1500 requests/day)
     const dailyCheck = await checkRateLimit(geminiDailyLimit, userId, "Gemini AI (daily)");
+    console.log("📅 Daily limit check:", dailyCheck);
+
     if (!dailyCheck.allowed) {
+      console.log("🚫 DAILY RATE LIMIT EXCEEDED");
       return dailyCheck.response!;
     }
 

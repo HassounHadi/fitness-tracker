@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyToken } from "./lib/jwt";
+import { getToken } from "next-auth/jwt";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes that don't require authentication
@@ -17,30 +18,43 @@ export function middleware(request: NextRequest) {
   // Check if the route is public
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
 
-  // JWT Authentication for protected API routes
+  // Authentication for protected API routes
   if (pathname.startsWith("/api") && !isPublicRoute) {
-    const authHeader = request.headers.get("Authorization");
+    let userId: string | null = null;
+    let userEmail: string | null = null;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized",
-          message: "Missing or invalid authorization header"
-        },
-        { status: 401 }
-      );
+    // Method 1: Check for Bearer token in Authorization header (for API clients)
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.substring(7);
+      const decoded = verifyToken(token, process.env.JWT_SECRET!);
+
+      if (decoded && typeof decoded !== 'string') {
+        userId = decoded.sub as string;
+        userEmail = (decoded as { email?: string }).email || null;
+      }
     }
 
-    const token = authHeader.substring(7); // Remove "Bearer " prefix
-    const decoded = verifyToken(token, process.env.JWT_SECRET!);
+    // Method 2: Check for NextAuth session cookie (for frontend)
+    if (!userId) {
+      const token = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET
+      });
 
-    if (!decoded || typeof decoded === 'string') {
+      if (token?.sub) {
+        userId = token.sub;
+        userEmail = token.email as string || null;
+      }
+    }
+
+    // If no valid authentication found, return 401
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
           error: "Unauthorized",
-          message: "Invalid or expired token"
+          message: "Authentication required"
         },
         { status: 401 }
       );
@@ -48,8 +62,10 @@ export function middleware(request: NextRequest) {
 
     // Attach user info to request headers for routes to access
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-user-id", decoded.sub as string);
-    requestHeaders.set("x-user-email", (decoded as { email?: string }).email || "");
+    requestHeaders.set("x-user-id", userId);
+    if (userEmail) {
+      requestHeaders.set("x-user-email", userEmail);
+    }
 
     const response = NextResponse.next({
       request: {

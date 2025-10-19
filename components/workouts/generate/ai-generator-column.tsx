@@ -127,7 +127,7 @@ export function AIGeneratorColumn({
           onClick={onGenerate}
           className="w-full gap-2"
           size="lg"
-          disabled={loading || !goal || !duration || targetMuscles.length === 0}
+          // disabled={loading || !goal || !duration || targetMuscles.length === 0}
         >
           <Sparkles className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
           {loading ? "Generating..." : "Generate with AI"}

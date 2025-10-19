@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { getSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 // Standard API Response Type
 export interface ApiResponse<T = unknown> {
@@ -16,8 +16,9 @@ interface ApiClientOptions extends RequestInit {
 }
 
 /**
- * Centralized API client with automatic JWT token injection and toast handling
+ * Centralized API client with automatic toast handling and rate limit warnings
  * Maps HTTP status codes to appropriate toast variants
+ * Uses NextAuth session cookies for authentication (no need for manual token handling)
  */
 export async function apiClient<T = unknown>(
   url: string,
@@ -26,15 +27,10 @@ export async function apiClient<T = unknown>(
   const { showToast = true, successMessage, ...fetchOptions } = options;
 
   try {
-    // Get the JWT token from the session
-    const session = await getSession();
-    const token = (session as { accessToken?: string })?.accessToken;
-
     const response = await fetch(url, {
       ...fetchOptions,
       headers: {
         "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }), // Add JWT token if available
         ...fetchOptions.headers,
       },
     });
@@ -60,6 +56,20 @@ export async function apiClient<T = unknown>(
           `Rate limit warning: ${remaining} of ${limit} requests remaining. Resets at ${resetTime}.`
         );
       }
+    }
+
+    // Handle 401 Unauthorized - sign out and redirect to login
+    if (response.status === 401) {
+      if (showToast) {
+        toast.error("Session expired. Please login again.");
+      }
+      // Sign out the user and redirect to login
+      await signOut({ callbackUrl: "/login", redirect: true });
+      return {
+        success: false,
+        message: "Unauthorized",
+        statusCode: 401,
+      };
     }
 
     // Determine toast variant based on status code
