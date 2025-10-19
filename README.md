@@ -191,11 +191,11 @@ The **Active Workout Page** guides users through their workout in real time, ste
 
 ---
 
-### 🧭 Progress Tracking
+### 📊 Progress Tracking & Analytics
 
-The **Progress Page** provides an overview of the user’s fitness journey, visualized through their logged body metrics and improvement trends.
+The **Progress Page** provides comprehensive visualization and tracking of your fitness journey through interactive charts and detailed metrics powered by **Recharts**.
 
-#### Features
+#### ✨ Features
 
 - **Stat Overview Cards**
 
@@ -203,31 +203,91 @@ The **Progress Page** provides an overview of the user’s fitness journey, visu
   - **Body Fat Percentage** (trend analysis)
   - **Total Progress Entries** (number of logs and last update date)
 
-- **Measurements Display**
+- **Latest Measurements Display**
 
   - Shows the most recent measurements for:
     **Chest**, **Waist**, **Hips**, **Biceps**, and **Thighs** (in cm)
 
 - **Progress Logging**
 
-  - The **“Log Progress”** button opens a dialog form where users can enter:
+  - The **"Log Progress"** button opens a dialog form where users can enter:
     - Current **weight (kg)**
     - **Body fat %**
     - Body measurements (**chest, waist, hips, biceps, thighs** in cm)
     - Optional **notes**
-  - When submitted, this data is saved to the database and automatically updates the progress overview.
+  - When submitted, this data is saved to the database and automatically updates all charts and statistics.
 
-- **Trend Indicators**
-  - Weight and body fat trends are calculated by comparing the two most recent progress entries.
-  - Decreases in weight or body fat are shown as positive progress.
+#### 📈 Interactive Charts & Visualizations
 
-#### Technical Notes
+The Progress Page includes **5 comprehensive charts** built with Recharts that provide deep insights into your fitness journey:
 
-- Data fetching is handled via:
-  - `useLatestProgress()` → retrieves the most recent log.
-  - `useProgressLogs()` → retrieves all user progress entries.
-- Trend logic is computed using `useMemo` to compare the last two logs.
-- The log dialog form (`ProgressLogDialog`) handles data submission and refreshes the state upon success.
+1. **Weight Trends Chart (Line Chart)**
+   - Tracks weight changes over time
+   - Compares actual weight vs target weight goal
+   - Visualizes progress toward weight objectives
+   - Interactive tooltips show exact values for each data point
+
+2. **Workout Volume Chart (Bar Chart)**
+   - Displays total training volume (reps × weight) per workout
+   - Shows number of sets completed per session
+   - Dual Y-axis for comparing volume and sets
+   - Helps identify training intensity patterns
+
+3. **Workout Consistency Heatmap**
+   - Calendar-style heatmap showing workout completion over 12 weeks (84 days)
+   - Visual indicators for workout days vs rest days
+   - Key statistics:
+     - Total workouts completed
+     - Overall consistency percentage
+     - Current workout streak
+   - GitHub-style contribution graph for fitness tracking
+
+4. **Body Measurements Chart (Multi-Line Chart)**
+   - Tracks changes in all body measurements over time:
+     - Chest, Waist, Hips, Biceps, Thighs
+   - Color-coded lines for each measurement
+   - Helps visualize muscle growth and body composition changes
+   - Automatically handles missing data points
+
+5. **Nutrition Progress Chart (Area Chart)**
+   - Visualizes daily calorie and macronutrient intake
+   - Stacked area chart showing:
+     - Total calories consumed
+     - Protein, carbs, and fat breakdown
+   - Compares intake against user's nutrition goals
+   - Identifies eating patterns and consistency
+
+#### 🎯 Smart Nutrition Goals
+
+- **User-Specific Goals:**
+  The dashboard now pulls nutrition goals directly from the user's profile settings, including:
+  - Daily calorie target
+  - Protein goal (g)
+  - Carbohydrate goal (g)
+  - Fat goal (g)
+
+- **Dynamic Progress Rings:**
+  Nutrition progress is displayed using circular progress rings that compare actual intake vs goals in real-time.
+
+#### 🔧 Technical Implementation
+
+- **Data Fetching:**
+  - `useLatestProgress()` → retrieves the most recent log
+  - `useProgressLogs()` → retrieves all user progress entries
+  - `useWorkoutStats(days)` → fetches workout volume and completion data
+  - `useNutritionLogs(startDate, endDate)` → fetches nutrition history
+  - `useTodaysNutrition()` → now includes user's nutrition goals from database
+
+- **Chart Components:**
+  - Built with **Recharts** library for responsive, interactive visualizations
+  - All charts feature responsive design, tooltips, legends, and proper axis labeling
+  - Empty states guide users to start logging data
+
+- **API Endpoints:**
+  - `/api/workout-stats` → Returns workout volume, sets, reps, and dates
+  - `/api/nutrition/summary` → Returns today's nutrition + user's goals
+  - `/api/nutrition` → Fetches historical nutrition logs
+  - `/api/progress` → Fetches body measurement history
 
 ---
 ```

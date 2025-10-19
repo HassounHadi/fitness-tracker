@@ -7,7 +7,7 @@ import { CircularRings } from "@/components/ui/circular-rings";
 import { NutritionLogDialog } from "@/components/dashboard/nutrition-log-dialog";
 import Link from "next/link";
 import { useScheduledWorkouts } from "@/hooks/use-scheduled-workouts";
-import { useTodaysNutrition } from "@/hooks/use-nutrition";
+import { useNutritionSummaryWithGoals } from "@/hooks/use-nutrition";
 import { useSession } from "next-auth/react";
 import { startOfDay, endOfDay } from "date-fns";
 import { useMemo } from "react";
@@ -20,9 +20,9 @@ export default function DashboardPage() {
   const { data: scheduledWorkouts = [], isLoading: workoutLoading } =
     useScheduledWorkouts(startOfDay(today), endOfDay(today));
 
-  // Fetch today's nutrition
+  // Fetch today's nutrition with goals from database
   const { data: nutritionData, isLoading: nutritionLoading } =
-    useTodaysNutrition();
+    useNutritionSummaryWithGoals();
 
   const todaysWorkout = useMemo(() => {
     if (scheduledWorkouts.length === 0) return null;
@@ -41,22 +41,7 @@ export default function DashboardPage() {
     };
   }, [scheduledWorkouts]);
 
-  // Get user goals from profile
-  const userWithGoals = session?.user as
-    | {
-        dailyCalorieGoal?: number;
-        proteinGoal?: number;
-        carbGoal?: number;
-        fatGoal?: number;
-      }
-    | undefined;
-
-  const calorieGoal = userWithGoals?.dailyCalorieGoal ?? 2000;
-  const proteinGoal = userWithGoals?.proteinGoal ?? 150;
-  const carbGoal = userWithGoals?.carbGoal ?? 200;
-  const fatGoal = userWithGoals?.fatGoal ?? 60;
-
-  // Build nutrition rings with real data
+  // Build nutrition rings with real data from API
   const nutritionRings = useMemo(() => {
     const summary = nutritionData?.summary || {
       totalProtein: 0,
@@ -64,30 +49,36 @@ export default function DashboardPage() {
       totalFat: 0,
     };
 
+    const goals = nutritionData?.goals || {
+      proteinGoal: 150,
+      carbGoal: 200,
+      fatGoal: 60,
+    };
+
     return [
       {
         name: "Protein",
         actual: summary.totalProtein,
-        goal: proteinGoal,
+        goal: goals.proteinGoal,
         color: "#3b82f6",
         unit: "g",
       },
       {
         name: "Carbs",
         actual: summary.totalCarbs,
-        goal: carbGoal,
+        goal: goals.carbGoal,
         color: "#10b981",
         unit: "g",
       },
       {
         name: "Fats",
         actual: summary.totalFat,
-        goal: fatGoal,
+        goal: goals.fatGoal,
         color: "#f59e0b",
         unit: "g",
       },
     ];
-  }, [nutritionData, proteinGoal, carbGoal, fatGoal]);
+  }, [nutritionData]);
 
   return (
     <div className="space-y-8">
@@ -173,7 +164,7 @@ export default function DashboardPage() {
                   centerContent={{
                     label: "Calories",
                     actual: nutritionData?.summary.totalCalories || 0,
-                    goal: calorieGoal,
+                    goal: nutritionData?.goals.dailyCalorieGoal || 2000,
                   }}
                 />
                 <NutritionLogDialog />

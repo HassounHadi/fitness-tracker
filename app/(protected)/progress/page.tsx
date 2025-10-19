@@ -4,13 +4,34 @@ import { StatCard } from "@/components/progress/stat-card";
 import { ProgressLogDialog } from "@/components/progress/progress-log-dialog";
 import { Dumbbell, Target, Activity } from "lucide-react";
 import { useLatestProgress, useProgressLogs } from "@/hooks/use-progress";
+import { useNutritionLogs } from "@/hooks/use-nutrition";
+import { useWorkoutStats } from "@/hooks/use-workout-stats";
+import { WeightTrendsChart } from "@/components/progress/weight-trends-chart";
+import { BodyMeasurementsChart } from "@/components/progress/body-measurements-chart";
+import { WorkoutVolumeChart } from "@/components/progress/workout-volume-chart";
+import { ConsistencyHeatmap } from "@/components/progress/consistency-heatmap";
+import { NutritionProgressChart } from "@/components/progress/nutrition-progress-chart";
+import { ChartSkeleton } from "@/components/progress/chart-skeleton";
 import { useSession } from "next-auth/react";
 import { useMemo } from "react";
+import { subDays } from "date-fns";
 
 export default function ProgressPage() {
   const { data: session } = useSession();
   const { data: latestProgress } = useLatestProgress();
-  const { data: allProgress = [] } = useProgressLogs();
+  const { data: allProgress = [], isLoading: isLoadingProgress } = useProgressLogs();
+
+  // Fetch data for charts - last 30 days
+  // Use useMemo to prevent creating new date objects on every render
+  const dateRange = useMemo(() => {
+    const daysToShow = 30;
+    const endDate = new Date();
+    const startDate = subDays(endDate, daysToShow);
+    return { startDate, endDate, daysToShow };
+  }, []);
+
+  const { data: nutritionLogs = [], isLoading: isLoadingNutrition } = useNutritionLogs(dateRange.startDate, dateRange.endDate);
+  const { data: workoutStats = [], isLoading: isLoadingWorkouts } = useWorkoutStats(dateRange.daysToShow);
 
   // Calculate progress trends
   const progressStats = useMemo(() => {
@@ -55,9 +76,53 @@ export default function ProgressPage() {
     };
   }, [latestProgress, allProgress]);
 
-  // User's target weight from profile
-  const targetWeight = (session?.user as { targetWeight?: number })
-    ?.targetWeight;
+  // User's target weight and nutrition goals from profile
+  const userWithGoals = session?.user as
+    | {
+        targetWeight?: number;
+        dailyCalorieGoal?: number;
+        proteinGoal?: number;
+        carbGoal?: number;
+        fatGoal?: number;
+      }
+    | undefined;
+
+  const targetWeight = userWithGoals?.targetWeight;
+  const nutritionGoals = {
+    calories: userWithGoals?.dailyCalorieGoal ?? 2000,
+    protein: userWithGoals?.proteinGoal ?? 150,
+    carbs: userWithGoals?.carbGoal ?? 200,
+    fat: userWithGoals?.fatGoal ?? 60,
+  };
+
+  // Prepare data for charts
+  const weightData = useMemo(
+    () =>
+      allProgress.map((p) => ({
+        date: p.date,
+        weight: p.weight,
+        bodyFat: p.bodyFat,
+      })),
+    [allProgress]
+  );
+
+  const measurementData = useMemo(
+    () =>
+      allProgress.map((p) => ({
+        date: p.date,
+        chest: p.chest,
+        waist: p.waist,
+        hips: p.hips,
+        biceps: p.biceps,
+        thighs: p.thighs,
+      })),
+    [allProgress]
+  );
+
+  const workoutDates = useMemo(
+    () => workoutStats.map((stat) => stat.date),
+    [workoutStats]
+  );
 
   return (
     <div className="flex flex-col gap-10">
@@ -184,6 +249,53 @@ export default function ProgressPage() {
           </div>
         </div>
       )}
+
+      {/* Charts Section */}
+      <div className="mt-8">
+        <h2 className="t2 text-primary mb-6">Analytics & Trends</h2>
+
+        {/* Weight & Body Fat Trends */}
+        <div className="mb-6">
+          {isLoadingProgress ? (
+            <ChartSkeleton />
+          ) : (
+            <WeightTrendsChart data={weightData} targetWeight={targetWeight} />
+          )}
+        </div>
+
+        {/* Workout Volume & Consistency Grid */}
+        <div className="grid gap-6 md:grid-cols-2 mb-6">
+          {isLoadingWorkouts ? (
+            <>
+              <ChartSkeleton />
+              <ChartSkeleton />
+            </>
+          ) : (
+            <>
+              <WorkoutVolumeChart data={workoutStats} />
+              <ConsistencyHeatmap workoutDates={workoutDates} days={84} />
+            </>
+          )}
+        </div>
+
+        {/* Body Measurements Chart */}
+        <div className="mb-6">
+          {isLoadingProgress ? (
+            <ChartSkeleton />
+          ) : (
+            <BodyMeasurementsChart data={measurementData} />
+          )}
+        </div>
+
+        {/* Nutrition Progress Chart */}
+        <div className="mb-6">
+          {isLoadingNutrition ? (
+            <ChartSkeleton />
+          ) : (
+            <NutritionProgressChart data={nutritionLogs} goals={nutritionGoals} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

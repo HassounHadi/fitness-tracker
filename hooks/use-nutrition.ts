@@ -33,6 +33,19 @@ export interface NutritionSummary {
   mealCount: number;
 }
 
+export interface NutritionGoals {
+  dailyCalorieGoal: number;
+  proteinGoal: number;
+  carbGoal: number;
+  fatGoal: number;
+}
+
+export interface NutritionSummaryResponse {
+  summary: NutritionSummary;
+  goals: NutritionGoals;
+  logs: NutritionLog[];
+}
+
 // ==================== Hooks ====================
 
 /**
@@ -102,6 +115,25 @@ export function useTodaysNutrition() {
 }
 
 /**
+ * Fetches today's nutrition summary along with user's nutrition goals from database
+ */
+export function useNutritionSummaryWithGoals() {
+  return useQuery({
+    queryKey: ["nutrition-summary", "today"],
+    queryFn: async () => {
+      const res = await fetch("/api/nutrition/summary");
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "Failed to fetch nutrition summary");
+      }
+
+      return data.data as NutritionSummaryResponse;
+    },
+  });
+}
+
+/**
  * Creates a nutrition log
  */
 export function useCreateNutritionLog() {
@@ -125,6 +157,7 @@ export function useCreateNutritionLog() {
     onSuccess: () => {
       // Invalidate all nutrition queries to refetch
       queryClient.invalidateQueries({ queryKey: ["nutrition-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["nutrition-summary"] });
     },
   });
 }
