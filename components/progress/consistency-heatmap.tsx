@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   startOfWeek,
-  endOfWeek,
   eachDayOfInterval,
   format,
   isSameDay,
@@ -11,11 +10,6 @@ import {
   startOfDay,
 } from "date-fns";
 import { useMemo } from "react";
-
-interface ConsistencyData {
-  date: string;
-  workoutCompleted: boolean;
-}
 
 interface ConsistencyHeatmapProps {
   workoutDates: string[]; // Array of dates when workouts were completed
@@ -47,7 +41,10 @@ export function ConsistencyHeatmap({
     const weekMap = new Map<string, Date[]>();
 
     dateRange.forEach((date) => {
-      const weekStart = format(startOfWeek(date, { weekStartsOn: 1 }), "yyyy-MM-dd");
+      const weekStart = format(
+        startOfWeek(date, { weekStartsOn: 1 }),
+        "yyyy-MM-dd"
+      );
       if (!weekMap.has(weekStart)) {
         weekMap.set(weekStart, []);
       }
@@ -82,15 +79,21 @@ export function ConsistencyHeatmap({
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{stats.totalWorkouts}</p>
+            <p className="text-2xl font-bold text-primary">
+              {stats.totalWorkouts}
+            </p>
             <p className="text-xs text-muted-foreground">Total Workouts</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{stats.consistency}%</p>
+            <p className="text-2xl font-bold text-primary">
+              {stats.consistency}%
+            </p>
             <p className="text-xs text-muted-foreground">Consistency</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{stats.currentStreak}</p>
+            <p className="text-2xl font-bold text-primary">
+              {stats.currentStreak}
+            </p>
             <p className="text-xs text-muted-foreground">Day Streak</p>
           </div>
         </div>
@@ -140,7 +143,9 @@ export function ConsistencyHeatmap({
                       title={
                         date
                           ? `${format(date, "MMM d, yyyy")}${
-                              hasWorkout ? " - Workout completed" : " - No workout"
+                              hasWorkout
+                                ? " - Workout completed"
+                                : " - No workout"
                             }`
                           : ""
                       }

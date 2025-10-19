@@ -87,9 +87,9 @@ export default function OnboardingPage() {
     "Gym Access",
   ];
 
-  const onProfileSubmit = (data: ProfileForm) => setStep(2);
+  const onProfileSubmit = () => setStep(2);
 
-  const onGoalsSubmit = (data: GoalsForm) => setStep(3);
+  const onGoalsSubmit = () => setStep(3);
 
   const onEquipmentSubmit = (data: EquipmentForm) => {
     const completeData = {

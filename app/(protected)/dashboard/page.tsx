@@ -8,13 +8,10 @@ import { NutritionLogDialog } from "@/components/dashboard/nutrition-log-dialog"
 import Link from "next/link";
 import { useScheduledWorkouts } from "@/hooks/use-scheduled-workouts";
 import { useNutritionSummaryWithGoals } from "@/hooks/use-nutrition";
-import { useSession } from "next-auth/react";
 import { startOfDay, endOfDay } from "date-fns";
 import { useMemo } from "react";
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
-
   // Fetch today's scheduled workout
   const today = new Date();
   const { data: scheduledWorkouts = [], isLoading: workoutLoading } =
